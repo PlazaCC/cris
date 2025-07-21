@@ -3,11 +3,12 @@ import { createRouter, RouterProvider } from '@tanstack/react-router'
 
 import { rootRoute } from './pages/root'
 
+import { AboutPage } from './pages/about'
 import { HomePage } from './pages/home'
 
 const queryClient = new QueryClient()
 
-const routeTree = rootRoute.addChildren([HomePage.route])
+const routeTree = rootRoute.addChildren([HomePage.route, AboutPage.route])
 
 const router = createRouter({
   routeTree,
