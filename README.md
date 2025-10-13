@@ -17,3 +17,7 @@
 ## 🧩 Estrutura do Projeto
 
 Organizado em um **monorepo** com **Yarn Workspaces**
+
+## Layout
+
+https://www.figma.com/design/wpKeDtZWDlRcwBXDVRvWce/Folio-2025--Copy-?node-id=0-1&p=f&t=Z25xljeR2rar3Sax-0
