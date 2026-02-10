@@ -2581,6 +2581,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/lodash.clonedeep@npm:^4":
+  version: 4.5.9
+  resolution: "@types/lodash.clonedeep@npm:4.5.9"
+  dependencies:
+    "@types/lodash": "npm:*"
+  checksum: 10c0/2f224ce9578046bccd1cd9594fb73540600ebd3d59a45695166a6123e2c376b84ab106b005a00453f357907f25bc8bfd2271b822be76e8f5527eadb4690b5e96
+  languageName: node
+  linkType: hard
+
+"@types/lodash@npm:*":
+  version: 4.17.20
+  resolution: "@types/lodash@npm:4.17.20"
+  checksum: 10c0/98cdd0faae22cbb8079a01a3bb65aa8f8c41143367486c1cbf5adc83f16c9272a2a5d2c1f541f61d0d73da543c16ee1d21cf2ef86cb93cd0cc0ac3bced6dd88f
+  languageName: node
+  linkType: hard
+
 "@types/ndarray@npm:^1.0.11, @types/ndarray@npm:^1.0.14":
   version: 1.0.14
   resolution: "@types/ndarray@npm:1.0.14"
@@ -3221,6 +3237,7 @@ __metadata:
     "@tanstack/react-query-devtools": "npm:^5.81.5"
     "@tanstack/react-router": "npm:^1.124.0"
     "@tanstack/react-router-devtools": "npm:^1.124.0"
+    "@types/lodash.clonedeep": "npm:^4"
     "@types/node": "npm:^24.0.10"
     "@types/react": "npm:^19.1.2"
     "@types/react-dom": "npm:^19.1.2"
@@ -3234,7 +3251,9 @@ __metadata:
     eslint-plugin-react-refresh: "npm:^0.4.19"
     globals: "npm:^16.0.0"
     gltfjsx: "npm:^6.5.3"
+    lodash.clonedeep: "npm:^4.5.0"
     lucide-react: "npm:^0.525.0"
+    motion: "npm:^12.23.24"
     next-themes: "npm:^0.4.6"
     postcss: "npm:^8.5.4"
     react: "npm:^19.1.0"
@@ -4296,6 +4315,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"framer-motion@npm:^12.23.24":
+  version: 12.23.24
+  resolution: "framer-motion@npm:12.23.24"
+  dependencies:
+    motion-dom: "npm:^12.23.23"
+    motion-utils: "npm:^12.23.6"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    "@emotion/is-prop-valid": "*"
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@emotion/is-prop-valid":
+      optional: true
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10c0/716addd9fa85dd2c1475ab848e14c4e6d3246ced041de84afc19b1d6534c897256c8f2878864cf057039116e56f5ca1b87a4cbb943f0b1cf37199ef7174c3cf8
+  languageName: node
+  linkType: hard
+
 "fresh@npm:^2.0.0":
   version: 2.0.0
   resolution: "fresh@npm:2.0.0"
@@ -5233,6 +5274,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash.clonedeep@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "lodash.clonedeep@npm:4.5.0"
+  checksum: 10c0/2caf0e4808f319d761d2939ee0642fa6867a4bbf2cfce43276698828380756b99d4c4fa226d881655e6ac298dd453fe12a5ec8ba49861777759494c534936985
+  languageName: node
+  linkType: hard
+
 "lodash.merge@npm:^4.6.2":
   version: 4.6.2
   resolution: "lodash.merge@npm:4.6.2"
@@ -5540,6 +5588,43 @@ __metadata:
   bin:
     mkdirp: dist/cjs/src/bin.js
   checksum: 10c0/9f2b975e9246351f5e3a40dcfac99fcd0baa31fbfab615fe059fb11e51f10e4803c63de1f384c54d656e4db31d000e4767e9ef076a22e12a641357602e31d57d
+  languageName: node
+  linkType: hard
+
+"motion-dom@npm:^12.23.23":
+  version: 12.23.23
+  resolution: "motion-dom@npm:12.23.23"
+  dependencies:
+    motion-utils: "npm:^12.23.6"
+  checksum: 10c0/139705731085063519b88f23fcc5b1c13e15707a4ff3365da02ef9a4bf2a2d8ebed9a151c57e7f215ccd9e822365d93c16e28e619fbf25611f61dcff5ee81d75
+  languageName: node
+  linkType: hard
+
+"motion-utils@npm:^12.23.6":
+  version: 12.23.6
+  resolution: "motion-utils@npm:12.23.6"
+  checksum: 10c0/c058e8ba6423b3baa63e985bcc669877ee7d9579d938f5348b4e60c5ea1b4b33dd7f4877434436a4a5807f3cf00370d3fd4079a6fdd6309c5c87aa62b311a897
+  languageName: node
+  linkType: hard
+
+"motion@npm:^12.23.24":
+  version: 12.23.24
+  resolution: "motion@npm:12.23.24"
+  dependencies:
+    framer-motion: "npm:^12.23.24"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    "@emotion/is-prop-valid": "*"
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@emotion/is-prop-valid":
+      optional: true
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10c0/d937ddaf50816f97e4e7121f323104fd655045ef122bd03d433370649c00129a5dd928cbe54efe9add22a05b2a9b84b7cfda1fd5c5b1e9c6245cd94e1c24e823
   languageName: node
   linkType: hard
 

@@ -1,40 +1,44 @@
-import { ParagraphsBlock } from '@/components/blocks/paragraphs-block'
-import { ProjectProgressionBlock } from '@/components/blocks/projetct-progression'
-import { QuoteTitle } from '@/components/blocks/quote-title'
-import { ScopeBlock } from '@/components/blocks/scope'
-import { MarqueeBlock } from '@/pages/home/components/marquee'
-import { rootRoute } from '@/pages/root'
 import { createRoute } from '@tanstack/react-router'
+import { AppLayout } from '../_layout'
 
 HomePage.route = createRoute({
   path: '/',
   component: HomePage,
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => AppLayout.route,
 })
 
 export function HomePage() {
   return (
-    <div className="flex flex-col items-center justify-center">
-      <h1>Bem vindo ao Workspace do Plaza</h1>
-      <ScopeBlock
-        title="Scope and structure"
-        description="<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse velit ante, accumsan ac lacus at, pulvinar aliquam velit. Sed dictum neque at justo dictum mattis a a nibh. Nunc scelerisque leo vitae erat sagittis, nec egestas dui pulvinar. Vestibulum nulla augue, vehicula id tortor ut, sagittis consequat nisl. Pellentesque eleifend semper nunc ac tincidunt. Nam vehicula, elit vel consequat pellentesque, odio purus molestie odio, ut ultricies massa mauris id nunc. Nullam nisl lectus, hendrerit vitae dignissim a, tristique nec nunc. Nulla vel nisl eu nisl tempor vehicula. Phasellus placerat efficitur nulla.<br/><br/> Quail chicks need a feed that is: A. non-medicated, B. finely ground, and C. very high in protein. The best I could do for them was a turkey starter, pulverised and topped up with boiled egg to raise the protein content.
-</p>"
-      />
-      <QuoteTitle title="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse velit ante" />
-      <ParagraphsBlock
-        blocks={[
-          null,
-          {
-            text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse velit ante, accumsan ac lacus at, pulvinar aliquam velit. Sed dictum neque at justo dictum mattis a a nibh. Nunc scelerisque leo vitae erat sagittis, nec egestas dui pulvinar. Vestibulum nulla augue, vehicula id tortor ut, sagittis consequat nisl. Pellentesque eleifend semper nunc ac tincidunt. Nam vehicula, elit vel consequat pellentesque, odio purus molestie odio, ut ultricies massa mauris id nunc. Nullam nisl lectus, hendrerit vitae dignissim a, tristique nec nunc. Nulla vel nisl eu nisl tempor vehicula. Phasellus placerat efficitur nulla.',
-          },
-          {
-            text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse velit ante, accumsan ac lacus at, pulvinar aliquam velit. Sed dictum neque at justo dictum mattis a a nibh. Nunc scelerisque leo vitae erat sagittis, nec egestas dui pulvinar. Vestibulum nulla augue, vehicula id tortor ut, sagittis consequat nisl. Pellentesque eleifend semper nunc ac tincidunt. Nam vehicula, elit vel consequat pellentesque, odio purus molestie odio, ut ultricies massa mauris id nunc. Nullam nisl lectus, hendrerit vitae dignissim a, tristique nec nunc. Nulla vel nisl eu nisl tempor vehicula. Phasellus placerat efficitur nulla.',
-          },
-        ]}
-      />
-      <ProjectProgressionBlock />
-      <MarqueeBlock />
+    <>
+      <div className="flex w-full flex-col items-center justify-center">
+        <HomeHero />
+      </div>
+    </>
+  )
+}
+
+export const HomeHero = () => {
+  return (
+    <div className="w-full px-10 pt-9 pb-[115px]">
+      <div className="bg-off-white flex h-[830px] w-full flex-col gap-[400px] rounded-4xl p-[53px]">
+        <span className="text-[32px] leading-[100%] font-bold text-black">
+          unk
+        </span>
+        <div className="flex flex-col gap-16">
+          <h1 className="text-[88px] leading-[98%]">
+            <span className="after:bg-blue relative z-10 after:absolute after:bottom-[10px] after:left-0 after:-z-10 after:h-[8px] after:w-full after:content-['']">
+              Polymath
+            </span>{' '}
+            designer, in a relationship with interactivity
+          </h1>
+          <p className="text-lg">
+            Hi, I'm <span className="text-blue">Cris</span>, a multidisciplinary
+            designer who combines different design approaches to
+            <br />
+            solve my clients' needs.
+          </p>
+        </div>
+      </div>
     </div>
   )
 }

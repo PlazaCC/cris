@@ -1,10 +1,11 @@
-//PAGE ABOUT
-
 export interface PageAboutResponse {
   hero: {
     title: string
     description: string
-    image: string
+    image: {
+      desktop: string
+      mobile: string
+    }
   }
   clients: string[]
   skills: string[]
@@ -26,7 +27,10 @@ export type Block =
     }
   | {
       type: 'image'
-      images: string[]
+      images: {
+        desktop: string
+        mobile: string
+      }[]
     }
   | {
       type: 'results'
@@ -37,13 +41,18 @@ export type Block =
       }[]
     }
 
+export interface Project {
+  title: string
+  tags: string[]
+  description: string
+  year: string
+  image: {
+    desktop: string
+    mobile: string
+  }
+}
+
 export interface ProjectsResponse {
-  projects: {
-    title: string
-    tags: string[]
-    description: string
-    year: string
-    image: string
-  }[]
+  projects: Project[]
   blocks: Block[]
 }

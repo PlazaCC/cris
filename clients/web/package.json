@@ -28,7 +28,9 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "gltfjsx": "^6.5.3",
+    "lodash.clonedeep": "^4.5.0",
     "lucide-react": "^0.525.0",
+    "motion": "^12.23.24",
     "next-themes": "^0.4.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -43,6 +45,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
+    "@types/lodash.clonedeep": "^4",
     "@types/node": "^24.0.10",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
