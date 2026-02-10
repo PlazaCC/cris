@@ -6,6 +6,11 @@ import { Router } from './router'
 import { ThemeProvider } from './contexts/theme/provider'
 
 import { StrictMode } from 'react'
+
+import LocomotiveScroll from 'locomotive-scroll'
+
+new LocomotiveScroll()
+
 import './global.scss'
 import './index.css'
 

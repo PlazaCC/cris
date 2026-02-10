@@ -1,4 +1,6 @@
 import { cn } from '@/lib/utils'
+import { useNavigationStore } from '@/stores/navigation-store'
+import { motion } from 'framer-motion'
 
 const footerLinks = [
   {
@@ -16,25 +18,77 @@ const footerLinks = [
 ]
 
 export const Footer = () => {
+  const canNavigate = useNavigationStore((state) => state.canNavigate)
+
   return (
-    <footer className="bg-blue w-full">
-      <div className="m-auto flex max-w-[1210px] flex-col px-10 py-16">
-        <div className="flex items-center justify-between">
-          <h2 className="text-off-white text-[262px] font-bold">unk</h2>
-          <ul className="flex w-[439px] flex-col">
-            {footerLinks.map((link) => (
-              <FooterLink key={link.title} href={link.href}>
-                {link.title}
-              </FooterLink>
-            ))}
-          </ul>
+    <div className="overflow-hidden">
+      <motion.footer
+        className="bg-blue w-full"
+        animate={{
+          opacity: canNavigate ? 1 : 0,
+          translateY: canNavigate ? 0 : '100%',
+        }}
+        transition={{
+          opacity: {
+            duration: 0.5,
+            ease: 'linear',
+          },
+          translateY: {
+            duration: 0.5,
+            ease: [0.4, 0, 0.6, 0.2],
+          },
+        }}
+      >
+        <div className="m-auto flex max-w-[1210px] flex-col px-10 py-16">
+          <div className="flex items-center justify-between">
+            <motion.h2
+              className="text-off-white text-[262px] font-bold"
+              animate={{
+                translateY: canNavigate ? 0 : '-50%',
+              }}
+              transition={{
+                duration: 0.5,
+                delay: 0,
+                ease: [0.6, 0, 0.8, 0.2],
+              }}
+            >
+              unk
+            </motion.h2>
+            <motion.ul
+              className="flex w-[439px] flex-col"
+              animate={{
+                translateY: canNavigate ? 0 : '-50%',
+              }}
+              transition={{
+                duration: 0.5,
+                delay: 0,
+                ease: [0.6, 0, 0.8, 0.2],
+              }}
+            >
+              {footerLinks.map((link) => (
+                <FooterLink key={link.title} href={link.href}>
+                  {link.title}
+                </FooterLink>
+              ))}
+            </motion.ul>
+          </div>
+          <motion.div
+            className="text-off-white flex w-full justify-between"
+            animate={{
+              translateY: canNavigate ? 0 : '-200%',
+            }}
+            transition={{
+              duration: 0.5,
+              delay: 0,
+              ease: [0.6, 0, 0.8, 0.2],
+            }}
+          >
+            <p>2025 - Crisriano c</p>
+            <p>Colophon : Gabarito by Naipe</p>
+          </motion.div>
         </div>
-        <div className="text-off-white flex w-full justify-between">
-          <p>2025 - Crisriano c</p>
-          <p>Colophon : Gabarito by Naipe</p>
-        </div>
-      </div>
-    </footer>
+      </motion.footer>
+    </div>
   )
 }
 

@@ -9,7 +9,7 @@ import {
 } from '@tanstack/react-router'
 import { AnimatePresence, motion, useIsPresent, Variants } from 'framer-motion'
 import cloneDeep from 'lodash.clonedeep'
-import { forwardRef, useContext, useEffect, useRef } from 'react'
+import { forwardRef, useContext, useEffect, useLayoutEffect, useRef } from 'react'
 import { rootRoute } from './root'
 AppLayout.route = createRoute({
   id: 'app-layout',
@@ -43,6 +43,12 @@ const AnimatedOutlet = forwardRef<HTMLDivElement>((_, ref) => {
   if (isPresent) {
     renderedContext.current = cloneDeep(routerContext)
   }
+
+  // Scrolla para o topo ao montar (a página nova monta com opacity: 0,
+  // então o scroll é imperceptível graças ao mode="wait")
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
 
   // Controla a navegação durante as transições
   useEffect(() => {
