@@ -82,9 +82,9 @@ export const Projects = () => {
     <>
       <section
         ref={sectionRef}
-        className="relative w-full max-w-[1920px] px-10 pb-[93px]"
+        className="relative w-full max-w-[1920px] px-10"
       >
-        <div className="flex flex-col gap-9">
+        <ul className="flex flex-col gap-9">
           {projects.map((project, index) => (
             <ProjectCard
               key={project.id}
@@ -95,7 +95,7 @@ export const Projects = () => {
               onInView={() => setActiveIndex(index)}
             />
           ))}
-        </div>
+        </ul>
       </section>
 
       {/* Paginação fixa no meio da tela */}
@@ -119,7 +119,7 @@ const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
     return (
       <motion.div
         ref={ref}
-        className="relative h-[80vh] w-full overflow-hidden rounded-4xl"
+        className="relative mt-[35px] mb-[93px] h-[80vh] w-full overflow-hidden rounded-4xl"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: false, amount: 0.1 }}
