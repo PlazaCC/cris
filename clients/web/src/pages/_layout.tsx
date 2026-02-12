@@ -1,4 +1,5 @@
 import { Menu } from '@/components/menu'
+import { cn } from '@/lib/utils'
 import { useNavigationStore } from '@/stores/navigation-store'
 import {
   createRoute,
@@ -9,8 +10,15 @@ import {
 } from '@tanstack/react-router'
 import { AnimatePresence, motion, useIsPresent, Variants } from 'framer-motion'
 import cloneDeep from 'lodash.clonedeep'
-import { forwardRef, useContext, useEffect, useLayoutEffect, useRef } from 'react'
+import {
+  forwardRef,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+} from 'react'
 import { rootRoute } from './root'
+
 AppLayout.route = createRoute({
   id: 'app-layout',
   component: AppLayout,
@@ -24,7 +32,7 @@ export function AppLayout() {
   const nextMatch = matches[nextIndex]
 
   return (
-    <div className="relative w-full overflow-hidden">
+    <div className={cn('relative w-full')}>
       <AnimatePresence mode="wait">
         <AnimatedOutlet key={nextMatch?.id ?? match.id} />
       </AnimatePresence>

@@ -9,7 +9,7 @@ import { StrictMode } from 'react'
 
 import LocomotiveScroll from 'locomotive-scroll'
 
-new LocomotiveScroll()
+export const locomotiveScroll = new LocomotiveScroll()
 
 import './global.scss'
 import './index.css'

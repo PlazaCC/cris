@@ -1,8 +1,8 @@
 import { cn } from '@/lib/utils'
+import { locomotiveScroll } from '@/main'
 import { createRoute } from '@tanstack/react-router'
-import { motion } from 'framer-motion'
-import { useEffect } from 'react'
-import { create } from 'zustand'
+import { motion, useInView } from 'framer-motion'
+import { forwardRef, useRef, useState } from 'react'
 import { AppLayout } from '../_layout'
 
 HomePage.route = createRoute({
@@ -13,12 +13,10 @@ HomePage.route = createRoute({
 
 export function HomePage() {
   return (
-    <>
-      <div className="m-auto flex w-full max-w-[1920px] flex-col items-center justify-center">
-        <HomeHero />
-        <Projects />
-      </div>
-    </>
+    <div className="m-auto flex w-full max-w-[1920px] flex-col items-center justify-center overflow-visible">
+      <HomeHero />
+      <Projects />
+    </div>
   )
 }
 
@@ -55,139 +53,152 @@ export const HomeHero = () => {
   )
 }
 
-type ProjectsCarouselState = {
-  activeIndex: number
-  total: number
-  setTotal: (total: number) => void
-  goTo: (index: number) => void
-  next: () => void
-  prev: () => void
-}
-
-export const useProjectsCarouselStore = create<ProjectsCarouselState>(
-  (set, get) => ({
-    activeIndex: 0,
-    total: 0,
-    setTotal: (total) => set({ total }),
-    goTo: (index) => {
-      const { total } = get()
-      if (total === 0) return
-      const normalized = ((index % total) + total) % total
-      set({ activeIndex: normalized })
-    },
-    next: () => {
-      const { activeIndex, total } = get()
-      if (total === 0) return
-      set({ activeIndex: (activeIndex + 1) % total })
-    },
-    prev: () => {
-      const { activeIndex, total } = get()
-      if (total === 0) return
-      set({ activeIndex: (activeIndex - 1 + total) % total })
-    },
-  })
-)
+const projects = [
+  { id: 1, image: './images/project-1.png' },
+  { id: 2, image: './images/project-2.png' },
+  { id: 3, image: './images/project-1.png' },
+]
 
 export const Projects = () => {
-  const { activeIndex, goTo, setTotal } = useProjectsCarouselStore()
+  const sectionRef = useRef<HTMLElement>(null)
+  const isSectionInView = useInView(sectionRef, { amount: 0.25 })
+  const [activeIndex, setActiveIndex] = useState(0)
+  const projectRefs = useRef<(HTMLDivElement | null)[]>([])
 
-  const projects = [
-    { id: 1, image: './images/project-1.png' },
-    { id: 2, image: './images/project-2.png' },
-    { id: 3, image: './images/project-1.png' },
-  ]
-  const backgroundImages = projects.map((project) => project.image)
+  const scrollTo = (index: number) => {
+    const ref = projectRefs.current[index]
+    if (!ref) return
 
-  // inicializa o total na store
-  useEffect(() => {
-    setTotal(projects.length)
-  }, [projects.length, setTotal])
+    const height = ref.getBoundingClientRect().height
+
+    const offset = -(window.innerHeight - height) / 2
+
+    locomotiveScroll.scrollTo(ref, {
+      offset,
+    })
+  }
 
   return (
-    <section className="h-dvh w-full max-w-[1920px] px-10 pt-9 pb-[93px]">
-      <div className="relative h-full w-full">
-        <ProjectsBackground
-          images={backgroundImages}
-          activeIndex={activeIndex}
-        />
-        <div className="h-full w-full overflow-hidden rounded-4xl">
-          <motion.div
-            className="relative h-full w-full"
-            animate={{ y: `-${activeIndex * 100}%` }}
-            transition={{
-              duration: 1.2,
-              ease: [0.8, 0, 0.2, 1],
-            }}
-          >
-            {projects.map((project) => (
-              <div key={project.id} className="h-full w-full overflow-hidden">
-                <ProjectCard image={project.image} />
-              </div>
-            ))}
-          </motion.div>
-        </div>
-
-        {/* pagination */}
-        <ul className="absolute top-1/2 right-5 z-1 flex -translate-y-1/2 flex-col gap-7 rounded-full bg-black/40 px-1 py-3">
+    <>
+      <section
+        ref={sectionRef}
+        className="relative w-full max-w-[1920px] px-10 pb-[93px]"
+      >
+        <div className="flex flex-col gap-9">
           {projects.map((project, index) => (
-            <li key={project.id}>
-              <button
-                className={cn(
-                  'flex h-2 w-2 items-center justify-center',
-                  'cursor-pointer transition-all duration-300 hover:[&_div]:h-1.5 hover:[&_div]:w-1.5'
-                )}
-                onClick={() => goTo(index)}
-              >
-                <div
-                  className={cn(
-                    'h-1 w-1 rounded-full bg-white transition-all',
-                    activeIndex === index && 'h-1.5 w-1.5'
-                  )}
-                />
-              </button>
-            </li>
+            <ProjectCard
+              key={project.id}
+              ref={(el) => {
+                projectRefs.current[index] = el
+              }}
+              image={project.image}
+              onInView={() => setActiveIndex(index)}
+            />
           ))}
-        </ul>
-      </div>
-    </section>
-  )
-}
+        </div>
+      </section>
 
-type ProjectsBackgroundProps = {
-  images: string[]
-  activeIndex: number
-}
-
-const ProjectsBackground = ({
-  images,
-  activeIndex,
-}: ProjectsBackgroundProps) => {
-  return (
-    <div className="absolute top-0 left-0 h-full w-full rounded-4xl blur-[39px]">
-      {images.map((image, index) => (
-        <motion.img
-          key={`${image}-${index}`}
-          className="absolute top-0 left-0 h-full w-full object-cover"
-          src={image}
-          initial={false}
-          animate={{ opacity: activeIndex === index ? 0.75 : 0 }}
-          transition={{ duration: 1.2, ease: [0.66, 0, 0.5, 1] }}
-        />
-      ))}
-    </div>
+      {/* Paginação fixa no meio da tela */}
+      <Pagination
+        isVisible={isSectionInView}
+        activeIndex={activeIndex}
+        total={projects.length}
+        onNavigate={scrollTo}
+      />
+    </>
   )
 }
 
 type ProjectCardProps = {
   image: string
+  onInView: () => void
 }
 
-export const ProjectCard = ({ image }: ProjectCardProps) => {
-  return (
-    <div className="relative h-full w-full">
-      <div className="relative h-full w-full overflow-hidden">
+const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
+  ({ image, onInView }, ref) => {
+    return (
+      <motion.div
+        ref={ref}
+        className="relative h-[80vh] w-full overflow-hidden rounded-4xl"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: false, amount: 0.1 }}
+        onViewportEnter={() => {
+          onInView()
+        }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+      >
         <img className="h-full w-full object-cover" src={image} />
-      </div>
-    </div>
+
+        <div className="absolute bottom-[30px] left-[35px] flex w-full max-w-[360px] flex-col gap-4 rounded-2xl bg-white px-8 py-4">
+          <h2 className="text-[32px]">Lovesicky</h2>
+          <ul className="flex gap-2">
+            <li className="bg-blue rounded-full px-4 py-1 text-xs text-white">
+              art direction
+            </li>
+            <li className="bg-blue rounded-full px-4 py-1 text-xs text-white">
+              3D
+            </li>
+            <li className="bg-blue rounded-full px-4 py-1 text-xs text-white">
+              branding
+            </li>
+          </ul>
+        </div>
+      </motion.div>
+    )
+  }
+)
+
+type PaginationProps = {
+  isVisible: boolean
+  activeIndex: number
+  total: number
+  onNavigate: (index: number) => void
+}
+
+const Pagination = ({
+  isVisible,
+  activeIndex,
+  total,
+  onNavigate,
+}: PaginationProps) => {
+  return (
+    <motion.div
+      className={cn(
+        'fixed top-1/2 z-50 flex w-full max-w-[1920px] -translate-y-1/2 justify-end pr-15'
+      )}
+      initial={{ opacity: 0 }}
+      animate={{
+        opacity: isVisible ? 1 : 0,
+      }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      style={{ pointerEvents: isVisible ? 'auto' : 'none' }}
+    >
+      <ul
+        className={cn(
+          'flex flex-col gap-7 rounded-full bg-black/40 px-1 py-3',
+          isVisible ? 'pointer-events-auto' : 'pointer-events-none'
+        )}
+      >
+        {Array.from({ length: total }).map((_, index) => (
+          <li key={index}>
+            <button
+              className={cn(
+                'flex h-2 w-2 items-center justify-center',
+                'cursor-pointer transition-all duration-300 hover:[&_div]:h-1.5 hover:[&_div]:w-1.5'
+              )}
+              onClick={() => onNavigate(index)}
+            >
+              <div
+                className={cn(
+                  'h-1 w-1 rounded-full bg-white transition-all',
+                  activeIndex === index && 'h-1.5 w-1.5'
+                )}
+              />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </motion.div>
   )
 }
