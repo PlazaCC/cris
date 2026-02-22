@@ -1,23 +1,23 @@
-# Engineering Rules — CRIS Monorepo
+# Engineering Rules
 
-## 1) Objetivo
+## Purpose
 
-Este documento define o baseline técnico do projeto para manter:
+This document defines the technical baseline for:
 
-- Clean Architecture (dependências apontando para dentro)
-- Separação de responsabilidades (UI, domínio, dados)
-- Boas práticas de tipagem, validação e segurança
-- Aderência à documentação oficial compatível com as versões usadas no repositório
+- Clean Architecture with dependencies pointing inward
+- Separation of concerns between UI, domain, and data layers
+- Best practices for typing, validation, and security
+- Adherence to official documentation for the stack versions in use
 
-## 2) Stack atual e versões (fonte: package.json do monorepo)
+## Stack and Versions
 
-### Monorepo
+### Root
 
-- Node.js: `22.x` (obrigatório no root)
+- Node.js: `22.x` required
 - Yarn: `4.9.2`
 - Workspaces: `clients/*`, `shared/*`
 
-### Web (`clients/web`)
+### Web
 
 - React `19.1.x`
 - TypeScript `5.8.x`
@@ -28,17 +28,17 @@ Este documento define o baseline técnico do projeto para manter:
 - Axios `1.10.x`
 - Zustand `5.0.x`
 - Zod `3.25.x`
-- Radix UI (`@radix-ui/*`) para primitives de UI
+- Radix UI (`@radix-ui/*`) for UI primitives
 
-### CMS (`clients/cms`)
+### CMS
 
 - Strapi `5.36.1`
-- Node suportado pelo CMS: `>=20 <=24` (compatível com root `22.x`)
+- Node supported: `>=20 <=24` compatible with root `22.x`
 - PostgreSQL driver: `pg 8.8.0`
 
-## 3) Documentação oficial (usar sempre estas referências)
+## Official Documentation
 
-> Regra: para dúvidas de implementação, priorizar docs oficiais abaixo antes de blog/post aleatório.
+Always check official docs before searching for blog posts or third-party guides.
 
 - Node.js: https://nodejs.org/docs/latest-v22.x/api/
 - Yarn Berry (v4): https://yarnpkg.com/features/workspaces
@@ -52,109 +52,108 @@ Este documento define o baseline técnico do projeto para manter:
 - Zustand: https://zustand.docs.pmnd.rs/
 - Axios: https://axios-http.com/docs/intro
 - Radix UI: https://www.radix-ui.com/primitives/docs/overview/introduction
-- Strapi v5 docs: https://docs.strapi.io/
+- Strapi v5: https://docs.strapi.io/
 - Strapi CLI: https://docs.strapi.io/dev-docs/cli
 - Strapi Content API: https://docs.strapi.io/cms/api/content-api
 
-## 4) Baseline de Clean Architecture
+## Clean Architecture Baseline
 
-## 4.1 Web (`clients/web/src`)
+### Web Structure
 
-Camadas e responsabilidades:
+Layers and responsibilities:
 
-- `pages/` e componentes de rota: **apenas apresentação e composição**.
-- `components/`: componentes visuais e blocos reutilizáveis (sem regra de negócio).
-- `features/` (criar para novos fluxos): casos de uso por contexto funcional.
-- `entities/` (criar para novos fluxos): modelos de domínio, contratos e regras puras.
-- `lib/` e `shared` (quando aplicável): utilitários técnicos e integrações.
+- `pages/` and route components: presentation and composition only.
+- `components/`: visual components and reusable blocks without business logic.
+- `features/`: use cases grouped by functional context.
+- `entities/`: domain models, contracts, and pure business rules.
+- `lib/` and `shared/`: technical utilities and integrations.
 
-Regras:
+Rules:
 
-1. UI não acessa API diretamente.
-2. Toda chamada HTTP deve passar por client/adapters centralizados.
-3. DTO de API nunca vaza direto para componente sem mapeamento para tipo de domínio.
-4. Validação de entrada/saída em fronteiras com Zod.
-5. Hooks de dados (TanStack Query) ficam em `features/*/hooks` (ou pasta equivalente), não dentro de componentes de UI genéricos.
+1. UI never accesses the API directly.
+2. All HTTP calls go through centralized client and adapters.
+3. API DTOs never leak into components without mapping to domain types.
+4. Validate input and output at boundaries with Zod.
+5. Data hooks using TanStack Query live in `features/*/hooks` not inside generic UI components.
 
-## 4.2 CMS (`clients/cms/src/api`)
+### CMS Structure
 
-Fluxo padrão:
+Standard flow:
 
-- `routes` define contrato HTTP
-- `controllers` orquestram request/response
-- `services` concentram regra de negócio e acesso a dados
+- `routes` define HTTP contracts
+- `controllers` orchestrate request and response
+- `services` contain business logic and data access
 
-Regras:
+Rules:
 
-1. Controller sem regra de negócio complexa.
-2. Sanitização e validação de payload antes de persistir/publicar.
-3. Reuso de service para evitar lógica duplicada entre endpoints.
-4. Não acoplar estrutura de resposta a necessidades de tela específicas quando puder manter recurso consistente.
+1. Controllers should not contain complex business logic.
+2. Sanitize and validate payloads before persisting or publishing.
+3. Reuse services to avoid duplicated logic across endpoints.
+4. Keep response structures generic unless specific use cases require customization.
 
-## 5) Estado atual do projeto e direção
+## Project State and Direction
 
-Contexto atual:
+Current state:
 
-- Strapi acabou de ser iniciado.
-- Web ainda está com conteúdo mockado em código.
+- Strapi is up and running.
+- Web client still has some mocked content.
 
-Diretriz de evolução:
+Evolution guidelines:
 
-1. Manter mocks apenas em camada de adapter (`mock repository`) e nunca embutido em componente de UI.
-2. Introduzir client HTTP único para Strapi e tipar respostas.
-3. Migrar página a página de mock para dados reais via Query hooks.
-4. Criar mapeadores `Strapi -> Domain` por recurso (about, article, author, etc).
+1. Keep mocks at the adapter layer never embedded in UI components.
+2. Use a single HTTP client for Strapi and type all responses.
+3. Migrate page by page from mocks to real data using Query hooks.
+4. Create `Strapi -> Domain` mappers for each resource.
 
-### 5.1) Single types modulares no CMS
+### Modular Single Types
 
-Para manter organização e modularidade, dividir single types por responsabilidade:
+To maintain organization and modularity split single types by responsibility:
 
-- `Global`: apenas `siteName`, `siteDescription`, `favicon`, `defaultSeo`.
-- `Hero`: conteúdos do hero (home).
-- `Footer`: conteúdos do footer.
+- `Global`: site name, description, favicon, default SEO.
+- `Hero`: home hero content.
+- `Footer`: footer content.
 
-Regras:
+Rules:
 
-1. UI não deve conter dados mockados como fallback visual; mocks devem ficar apenas na seed do CMS.
-2. Componentes devem consumir apenas dados vindos do Strapi (via hooks/adapters).
-3. Em estados de erro/carregamento, preservar a base de estilização da sessão.
+1. UI should not contain mocked data as visual fallback. Mocks live in the CMS seed only.
+2. Components consume data from Strapi via hooks and adapters.
+3. Error and loading states should preserve the section layout.
 
-### 5.2) Nomenclatura de campos (UX do editor)
+### Field Naming for Editors
 
-Os nomes dos campos no Strapi sao exibidos como labels no Content Manager.
-Padrao: manter nomes curtos, em ingles e amigaveis para editores.
-Para mudar labels, renomear o campo no Content-type Builder e revisar o web.
+Field names in Strapi are displayed as labels in the Content Manager.
+Keep names short, in English, and editor-friendly.
+To change labels rename the field in the Content-type Builder and update the web client.
 
-### 5.3) Mudancas no Strapi exigem revisao no Web
+### Strapi Changes Require Web Updates
 
-Qualquer alteracao de schema/fields no Strapi deve ser refletida na web:
+Any schema or field changes in Strapi must be reflected in the web client:
 
-- Zod schemas em `features/*/schemas.ts`.
-- Adapters `Strapi -> Domain` em `lib/adapters/*`.
-- Hooks de dados em `features/*/hooks`.
-- Endpoints em `lib/api/endpoints.ts`.
-- Componentes/paginas consumidores.
+- Update Zod schemas in `features/*/schemas.ts`.
+- Update adapters in `lib/adapters/*`.
+- Update data hooks in `features/*/hooks`.
+- Update endpoints in `lib/api/endpoints.ts`.
+- Update consuming components and pages.
 
-### 5.4) Campos nulos no Strapi
+### Null Fields in Strapi
 
-Single types podem retornar `null` quando ainda nao foram preenchidos no CMS.
-Os schemas Zod do web devem aceitar `null` em campos opcionais e mapear para
-valores padrao no adapter, evitando estados de erro indevidos.
+Single types may return `null` when not yet filled in the CMS.
+Zod schemas in the web client should accept `null` for optional fields and map to default values in the adapter to avoid unnecessary error states.
 
-## 6) Convenções e qualidade
+## Conventions and Quality
 
-- TypeScript strict no web deve permanecer habilitado.
-- Evitar `any`; quando inevitável, encapsular e documentar motivo.
-- Componentes React: `PascalCase`; arquivos utilitários: `kebab-case`.
-- Não misturar responsabilidade de estilo, estado de domínio e I/O no mesmo módulo.
-- Toda nova dependência deve ser justificada e adicionada à seção de stack deste documento.
+- TypeScript strict mode must stay enabled in the web client.
+- Avoid `any`. When unavoidable encapsulate and document the reason.
+- React components use `PascalCase`. Utility files use `kebab-case`.
+- Do not mix styling, domain state, and I/O responsibilities in the same module.
+- Justify all new dependencies and add them to the stack section of this document.
 
-## 7) Definition of Done (DoD)
+## Definition of Done
 
-Uma entrega só está pronta quando:
+A task is complete when:
 
-1. Respeita camadas (sem violação de dependência).
-2. Possui tipagem consistente de ponta a ponta.
-3. Não mantém mock dentro de componente final.
-4. Passa lint/build do pacote alterado.
-5. Atualiza docs quando houver decisão arquitetural nova.
+1. It respects layers with no dependency violations.
+2. It has consistent typing end to end.
+3. It does not keep mocks inside final components.
+4. It passes lint and build for the changed package.
+5. It updates docs when introducing new architectural decisions.

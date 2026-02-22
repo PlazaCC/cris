@@ -1,84 +1,84 @@
-# Strapi Content Bootstrap — Inventário de mocks e prática recomendada
+# Strapi Content Bootstrap — Mock Inventory and Best Practices
 
-## 1) Conteúdo mockado identificado no `clients/web`
+## 1. Mocked Content Identified in Web Client
 
 ### About
 
-- `src/pages/about/components/hero.tsx`
-  - ✅ **Estrutura mapeada**: título, body, image (desktop/mobile)
-- `src/pages/about/components/clients.tsx`
-  - ✅ **Estrutura mapeada**: clients array
-- `src/pages/about/components/skills.tsx`
-  - ✅ **Estrutura mapeada**: skills array
-- **Status**: Schema reformulado para estrutura explícita (singleType `about`)
+- [src/pages/about/components/hero.tsx](../clients/web/src/pages/about/components/hero.tsx)
+  - ✅ **Structure mapped**: title, body, image (desktop/mobile)
+- [src/pages/about/components/clients.tsx](../clients/web/src/pages/about/components/clients.tsx)
+  - ✅ **Structure mapped**: clients array
+- [src/pages/about/components/skills.tsx](../clients/web/src/pages/about/components/skills.tsx)
+  - ✅ **Structure mapped**: skills array
+- **Status**: Schema created with explicit structure (singleType `about`)
 
 ### Home
 
-- `src/pages/home/index.tsx`
-  - Hero com título/subtítulo hardcoded.
-  - Imagem de header hardcoded (`./images/header-1.png`).
-  - ✅ **Estrutura mapeada**: Lista `projects` com cover_images (desktop/mobile), badges, year, blur_color
-  - Card com título/tags hardcoded → **migrado para Project.badges**
-- **Status**: Content-type `project` criado com campos específicos de portfolio
+- [src/pages/home/index.tsx](../clients/web/src/pages/home/index.tsx)
+  - Hero with hardcoded title/subtitle.
+  - Header image hardcoded (`./images/header-1.png`).
+  - ✅ **Structure mapped**: `projects` list with cover_images (desktop/mobile), badges, year, blur_color
+  - Card with hardcoded title/tags → **migrated to Project.badges**
+- **Status**: Content-type `project` created with portfolio-specific fields
 
 ### Work
 
-- `src/pages/work/index.tsx`
-  - ✅ **Estrutura mapeada**: Blocos de conteúdo com componentes portfolio
-  - Componentes: `scope-block`, `quote-title-block`, `paragraph-block`, `images-block`, `results-block`
-- **Status**: Dynamic zone em Project com componentes portfolio específicos
+- [src/pages/work/index.tsx](../clients/web/src/pages/work/index.tsx)
+  - ✅ **Structure mapped**: Content blocks with portfolio components
+  - Components: `scope-block`, `quote-title-block`, `paragraph-block`, `images-block`, `results-block`
+- **Status**: Dynamic zone in Project with portfolio-specific components
 
-### Globais (layout)
+### Globals (Layout)
 
-- `src/components/footer.tsx`
-  - Links, e-mail, branding, copyright hardcoded.
-- `src/components/menu.tsx`
-  - Itens de navegação e CTA hardcoded.
-- `src/pages/work/components/marquee.tsx`
-  - E-mail e microcopy hardcoded.
-- **Status**: Mantido como global (já existente), aguarda migração futura
+- [src/components/footer.tsx](../clients/web/src/components/footer.tsx)
+  - Links, email, branding, copyright hardcoded.
+- [src/components/menu.tsx](../clients/web/src/components/menu.tsx)
+  - Navigation items and CTA hardcoded.
+- [src/pages/work/components/marquee.tsx](../clients/web/src/pages/work/components/marquee.tsx)
+  - Email and microcopy hardcoded.
+- **Status**: Kept as global (already exists), awaiting future migration
 
-## 2) Strapi 5 — prática recomendada para abastecer conteúdo
+## 2. Strapi 5 — Best Practices for Content Provisioning
 
-Com base na documentação oficial atual do Strapi 5:
+Based on current official Strapi 5 documentation:
 
-1. Use **database migrations** para mudanças de estrutura e transformações one-off de dados no banco.
-2. Use **seed scripts** para conteúdo inicial/editorial de ambiente (dev, staging, demos).
-3. Use **import/export/transfer** para mover conteúdo entre instâncias.
+1. Use **database migrations** for structural changes and one-off data transformations.
+2. Use **seed scripts** for initial and editorial content for environments (dev, staging, demos).
+3. Use **import/export/transfer** to move content between instances.
 
-Referências oficiais:
+Official references:
 
 - Database migrations: https://docs.strapi.io/cms/database-migrations
 - Data management (import/export/transfer): https://docs.strapi.io/cms/features/data-management
 - CLI: https://docs.strapi.io/cms/cli
 
-### Observações importantes da doc (Strapi 5)
+### Important Notes from Docs (Strapi 5)
 
-- Migrations executam automaticamente no startup e em ordem alfabética dos arquivos.
-- Não há `down migration` oficial no momento.
-- Para projeto TypeScript, `useTypescriptMigrations` deve estar habilitado para localizar migrations compiladas corretamente.
+- Migrations run automatically on startup in alphabetical order.
+- No official `down migration` support at the moment.
+- For TypeScript projects, `useTypescriptMigrations` must be enabled to locate compiled migrations correctly.
 
-## 3) O que foi implementado (Schemas Portfolio-Specific)
+## 3. What Has Been Implemented (Portfolio-Specific Schemas)
 
 ### Content Types
 
 - ✅ **`api::project.project`** (collectionType)
-  - Substitui `article` com foco em portfolio
-  - Campos: slug, title, description, year, blur_color, badges[], cover_images{responsive}, blocks[]
-  - Controller, Service e Routes criados
+  - Replaces `article` with portfolio focus
+  - Fields: slug, title, description, year, blur_color, badges[], cover_images{responsive}, blocks[]
+  - Controller, Service and Routes created
 
-- ✅ **`api::about.about`** (singleType) — **reformulado**
-  - Estrutura explícita em vez de dynamic zone
-  - Campos: title, body, clients[], skills[], image{responsive}, email
+- ✅ **`api::about.about`** (singleType) — **restructured**
+  - Explicit structure instead of dynamic zone
+  - Fields: title, body, clients[], skills[], image{responsive}, email
 
-- ✅ **`api::global.global`** (singleType) — mantido
-  - Para site metadata, favicon, SEO defaults
+- ✅ **`api::global.global`** (singleType) — maintained
+  - For site metadata, favicon, SEO defaults
 
 ### Components
 
 - ✅ **`shared.responsive-image`**
-  - Reutilizável para desktop/mobile pattern
-  - Usado em: cover_images, about.image, portfolio.images-block
+  - Reusable for desktop/mobile pattern
+  - Used in: cover_images, about.image, portfolio.images-block
 
 - ✅ **`portfolio.scope-block`**
   - title (string), paragraphs (json/array)
@@ -100,79 +100,79 @@ Referências oficiais:
 
 ### Seed Script
 
-- Script atualizado: `clients/cms/scripts/seed.js`
-  - Função `resolveResponsiveImage()` para componentes desktop/mobile
-  - Função `resolveProjectPayload()` para projetos com novos componentes
-  - Função `resolveAboutPayload()` com image{responsive}
-  - Suporte a todos os blocos `portfolio.*`
-- Dados atualizados: `clients/cms/data/data.json`
-  - Estrutura de `about` com campos explícitos
-  - Array `projects` com badges, year, blur_color, cover_images, blocks portfolio
+- Updated script: [clients/cms/scripts/seed.js](../clients/cms/scripts/seed.js)
+  - Function `resolveResponsiveImage()` for desktop/mobile components
+  - Function `resolveProjectPayload()` for projects with new components
+  - Function `resolveAboutPayload()` with image{responsive}
+  - Support for all `portfolio.*` blocks
+- Updated data: [clients/cms/data/data.json](../clients/cms/data/data.json)
+  - `about` structure with explicit fields
+  - `projects` array with badges, year, blur_color, cover_images, portfolio blocks
 
-### Tipos TypeScript
+### TypeScript Types
 
-- Gerados automaticamente: `yarn strapi ts:generate-types`
-- Localização: `clients/cms/types/generated/`
-- Status: ✅ Validado (seed executou com sucesso)
+- Generated automatically: `yarn strapi ts:generate-types`
+- Location: `clients/cms/types/generated/`
+- Status: ✅ Validated (seed ran successfully)
 
-## 4) Como executar agora
+## 4. How to Run
 
-Na raiz do monorepo:
+From the monorepo root:
 
 ```bash
-# Gerar tipos TypeScript após mudanças de schema
-yarn workspace cris-cms strapi ts:generate-types
+# Generate TypeScript types after schema changes
+yarn workspace client-cms strapi ts:generate-types
 
-# Executar seed com novos dados
-yarn workspace cris-cms seed
+# Run seed with new data
+yarn workspace client-cms seed
 
-# Iniciar Strapi
-yarn workspace cris-cms develop
+# Start Strapi
+yarn workspace client-cms develop
 ```
 
-Depois validar no Admin do Strapi:
+Then validate in Strapi Admin:
 
 - Single Type `Global` (metadata, favicon, SEO)
 - Single Type `About` (title, body, clients, skills, image, email)
 - Collection Type `Project` (slug, title, badges, year, blur_color, cover_images, blocks)
 
-## 5) Próximo passo recomendado (para remover 100% dos mocks)
+## 5. Next Steps to Remove All Mocks
 
-### 5.1 Implementar camada de adaptadores no web
+### 5.1 Implement Adapter Layer in Web
 
-Seguir [docs/dto-domain-mapping.md](./dto-domain-mapping.md) para criar:
+Follow [docs/dto-domain-mapping.md](./dto-domain-mapping.md) to create:
 
-- `lib/adapters/strapi-image.ts` — funções auxiliares de mapeamento de media
+- `lib/adapters/strapi-image.ts` — media mapping helper functions
 - `lib/adapters/project-adapter.ts` — DTO → Project domain
 - `lib/adapters/about-adapter.ts` — DTO → AboutResponse domain
 - `lib/adapters/global-adapter.ts` — DTO → GlobalConfig domain
 
-### 5.2 Integrar TanStack Query
+### 5.2 Integrate TanStack Query
 
-- Criar `features/projects/queries.ts` com `useProjects()` e `useProject(slug)`
-- Criar `features/about/queries.ts` com `useAbout()`
-- Validar DTOs com Zod na entrada dos adapters
+- Create `features/projects/queries.ts` with `useProjects()` and `useProject(slug)`
+- Create `features/about/queries.ts` with `useAbout()`
+- Validate DTOs with Zod at adapter entry points
 
-### 5.3 Atualizar componentes
+### 5.3 Update Components
 
-- Substituir mocks por hooks:
-  - `pages/home/index.tsx` → `useProjects()`
-  - `pages/about/index.tsx` → `useAbout()`
-  - `pages/work/index.tsx` → `useProject(slug)` (página de detalhe)
+- Replace mocks with hooks:
+  - [pages/home/index.tsx](../clients/web/src/pages/home/index.tsx) → `useProjects()`
+  - [pages/about/index.tsx](../clients/web/src/pages/about/index.tsx) → `useAbout()`
+  - [pages/work/index.tsx](../clients/web/src/pages/work/index.tsx) → `useProject(slug)` (detail page)
 
-### 5.4 Criar Single Types restantes
+### 5.4 Create Remaining Single Types
 
 - **`api::navigation.navigation`** (menu/footer hardcoded)
 - **`api::homepage.homepage`** (hero content, hero image)
 
-### 5.5 Remover old schemas
+### 5.5 Remove Old Schemas
 
-- Deprecar `api::article.article` se não for mais necessário
-- Deprecar componentes `shared.quote`, `shared.rich-text`, `shared.slider` se não forem mais usados
+- Deprecate `api::article.article` if no longer needed
+- Deprecate components `shared.quote`, `shared.rich-text`, `shared.slider` if no longer used
 
-## 6) Referências
+## 6. References
 
-- [Engineering Rules](./engineering-rules.md) — baseline de arquitetura e convenções
-- [DTO → Domain Mapping](./dto-domain-mapping.md) — guia detalhado de implementação de adapters
+- [Engineering Rules](./engineering-rules.md) — architecture baseline and conventions
+- [DTO → Domain Mapping](./dto-domain-mapping.md) — detailed adapter implementation guide
 - [Strapi 5 Components](https://docs.strapi.io/dev-docs/backend-customization/models#components)
 - [Strapi 5 Content-Types](https://docs.strapi.io/dev-docs/backend-customization/models#content-types)

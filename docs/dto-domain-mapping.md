@@ -1,25 +1,25 @@
-# Mapeamento DTO → Domain (Strapi → Web)
+# DTO to Domain Mapping (Strapi to Web)
 
-## Visão Geral
+## Overview
 
-Este documento define o mapeamento entre os DTOs retornados pela API do Strapi e os tipos de domínio usados no cliente web.
+This document defines the mapping between DTOs returned by the Strapi API and the domain types used in the web client.
 
-## Atualização 2026-02 (estado atual)
+## Current State (2026-02)
 
-- O CMS atual usa Strapi v5 com payloads achatados (campos em `data[]`), mantendo fallback para `attributes` quando necessário.
-- `Project.badges` agora é relação many-to-many com `api::badge.badge`.
-- Blocos de projeto usam componentes repeatable (`portfolio.*`) e devem ser mapeados por discriminador `__component`.
-- URLs de mídia devem ser normalizadas para URL absoluta via `VITE_STRAPI_API_URL`.
+- The CMS uses Strapi v5 with flattened payloads (fields in `data[]`), maintaining fallback to `attributes` when necessary.
+- `Project.badges` is now a many-to-many relation with `api::badge.badge`.
+- Project blocks use repeatable components (`portfolio.*`) and must be mapped by `__component` discriminator.
+- Media URLs must be normalized to absolute URLs via `VITE_STRAPI_API_URL`.
 
-**Responsabilidade:** Camada de adaptadores (lib/adapters ou features/\*/adapters) deve implementar funções de mapeamento que transformam DTOs em tipos de domínio.
+**Responsibility:** The adapter layer (`lib/adapters` or `features/*/adapters`) must implement mapping functions that transform DTOs into domain types.
 
-**Princípio:** DTOs não devem vazar para camadas internas. Componentes visuais e lógica de negócio devem consumir apenas tipos de domínio.
+**Principle:** DTOs should not leak into internal layers. Visual components and business logic should only consume domain types.
 
 ---
 
 ## 1. Project (Portfolio)
 
-### DTO Strapi (API Response)
+### Strapi DTO (API Response)
 
 ```typescript
 // GET /api/projects?populate=deep
@@ -82,7 +82,7 @@ type Block =
     }
 ```
 
-### Mapeamento (Adapter)
+### Mapping (Adapter)
 
 ```typescript
 // clients/web/src/lib/adapters/project-adapter.ts
@@ -203,7 +203,7 @@ type AboutResponse = {
 }
 ```
 
-### Mapeamento (Adapter)
+### Mapping (Adapter)
 
 ```typescript
 // clients/web/src/lib/adapters/about-adapter.ts
@@ -226,7 +226,7 @@ export function mapStrapiAboutToDomain(strapiAbout: any): AboutResponse {
 
 ## 3. Global
 
-### DTO Strapi
+### Strapi DTO
 
 ```typescript
 {
@@ -260,7 +260,7 @@ type GlobalConfig = {
 }
 ```
 
-### Mapeamento
+### Mapping
 
 ```typescript
 export function mapStrapiGlobalToDomain(strapiGlobal: any): GlobalConfig {
@@ -281,9 +281,9 @@ export function mapStrapiGlobalToDomain(strapiGlobal: any): GlobalConfig {
 
 ---
 
-## Diretrizes de Implementação
+## Implementation Guidelines
 
-### 1. Estrutura de Pastas
+### 1. Folder Structure
 
 ```
 clients/web/src/
@@ -292,12 +292,12 @@ clients/web/src/
       about-adapter.ts
       project-adapter.ts
       global-adapter.ts
-      strapi-image.ts  # Funções auxiliares compartilhadas
+      strapi-image.ts  # Shared helper functions
 ```
 
-### 2. Validação com Zod
+### 2. Validation with Zod
 
-Sempre validar DTOs na entrada da camada de adaptadores:
+Always validate DTOs at the adapter layer entry point:
 
 ```typescript
 import { z } from 'zod'
@@ -307,17 +307,17 @@ const StrapiProjectDTOSchema = z.object({
     slug: z.string(),
     title: z.string(),
     description: z.string(),
-    // ... demais campos
+    // ... additional fields
   }),
 })
 
 export function mapStrapiProjectToDomain(strapiProject: unknown): Project {
   const validated = StrapiProjectDTOSchema.parse(strapiProject)
-  // ... restante do mapeamento
+  // ... rest of mapping
 }
 ```
 
-### 3. Uso com TanStack Query
+### 3. Usage with TanStack Query
 
 ```typescript
 // clients/web/src/features/projects/queries.ts
@@ -340,7 +340,7 @@ export function useProjects() {
 
 ### 4. Error Boundaries
 
-Sempre envolver componentes que consomem dados da API com Error Boundaries para capturar erros de validação/mapeamento:
+Always wrap components that consume API data with Error Boundaries to catch validation and mapping errors:
 
 ```tsx
 // clients/web/src/pages/work/index.tsx
@@ -357,23 +357,23 @@ export function WorkPage() {
 
 ---
 
-## Checklist de Implementação
+## Implementation Checklist
 
-- [ ] Criar `lib/adapters/strapi-image.ts` com funções auxiliares
-- [ ] Criar `lib/adapters/project-adapter.ts` com mapeamento de Project
-- [ ] Criar `lib/adapters/about-adapter.ts` com mapeamento de About
-- [ ] Criar `lib/adapters/global-adapter.ts` com mapeamento de Global
-- [ ] Adicionar validação Zod em todos os adapters
-- [ ] Criar `features/projects/queries.ts` com TanStack Query hooks
-- [ ] Criar `features/about/queries.ts` com TanStack Query hooks
-- [ ] Atualizar páginas para consumir hooks em vez de mocks
-- [ ] Adicionar Error Boundaries nas rotas principais
-- [ ] Atualizar testes unitários dos adapters
-- [ ] Documentar estratégia de cache do TanStack Query
+- [ ] Create `lib/adapters/strapi-image.ts` with helper functions
+- [ ] Create `lib/adapters/project-adapter.ts` with Project mapping
+- [ ] Create `lib/adapters/about-adapter.ts` with About mapping
+- [ ] Create `lib/adapters/global-adapter.ts` with Global mapping
+- [ ] Add Zod validation to all adapters
+- [ ] Create `features/projects/queries.ts` with TanStack Query hooks
+- [ ] Create `features/about/queries.ts` with TanStack Query hooks
+- [ ] Update pages to consume hooks instead of mocks
+- [ ] Add Error Boundaries to main routes
+- [ ] Update adapter unit tests
+- [ ] Document TanStack Query caching strategy
 
 ---
 
-## Referências
+## References
 
 - [Strapi 5 REST API Documentation](https://docs.strapi.io/dev-docs/api/rest)
 - [TanStack Query v5](https://tanstack.com/query/v5)
