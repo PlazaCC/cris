@@ -11,6 +11,6 @@ export function mapStrapiFooterToDomain(rawFooter: unknown): FooterData {
     links: parsed.links ?? [],
     year: parsed.year ?? '',
     copyright: parsed.copyright ?? '',
-    colophon: parsed.colophon,
+    colophon: parsed.colophon ?? undefined,
   }
 }

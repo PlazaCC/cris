@@ -6,7 +6,7 @@ const aboutItemSchema = z.object({
 
 export const aboutSchema = z.object({
   documentId: z.string().optional(),
-  attributes: z.any().optional(),
+  attributes: z.unknown().optional(),
   title: z.string().optional(),
   body: z.string().optional(),
   clients: z.array(aboutItemSchema).optional(),

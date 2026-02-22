@@ -29,7 +29,7 @@ const projectBlockSchema = z.object({
 
 export const projectSchema = z.object({
   documentId: z.string().optional(),
-  attributes: z.any().optional(),
+  attributes: z.unknown().optional(),
   slug: z.string().optional(),
   title: z.string().optional(),
   description: z.string().optional(),

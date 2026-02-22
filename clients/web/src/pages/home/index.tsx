@@ -69,15 +69,22 @@ function HeroSection() {
     )
   }
 
+  if (!global || !hero) {
+    return null
+  }
+
+  const resolvedGlobal = global
+  const resolvedHero = hero
+
   return (
     <HomeHero
-      siteName={global.siteName}
-      highlight={hero.highlight}
-      title={hero.title}
-      subtitle={hero.subtitle}
-      name={hero.name}
-      description={hero.description}
-      image={hero.image}
+      siteName={resolvedGlobal.siteName}
+      highlight={resolvedHero.highlight}
+      title={resolvedHero.title}
+      subtitle={resolvedHero.subtitle}
+      name={resolvedHero.name}
+      description={resolvedHero.description}
+      image={resolvedHero.image}
     />
   )
 }
