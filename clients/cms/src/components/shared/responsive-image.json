@@ -2,7 +2,7 @@
   "collectionName": "components_shared_responsive_images",
   "info": {
     "displayName": "Responsive Image",
-    "description": "Image with desktop and mobile variants"
+    "description": "Image for desktop and mobile"
   },
   "options": {},
   "attributes": {

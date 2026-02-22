@@ -1,17 +1,21 @@
 export const ScopeBlock = ({
   title,
-  description,
+  paragraphs,
 }: {
   title: string
-  description: string
+  paragraphs: string[]
 }) => {
   return (
-    <section className="flex w-full flex-col gap-10.5 bg-white px-4 py-32">
-      <h2 className="m-auto text-[66px] leading-[98%] font-bold">{title}</h2>
-      <div
-        className="text-dark-black m-auto w-full max-w-[670px] leading-[160%]"
-        dangerouslySetInnerHTML={{ __html: description }}
-      />
+    <section className="gap-10.5 flex w-full flex-col bg-white px-4 py-32">
+      <h2 className="m-auto text-[66px] font-bold leading-[98%]">{title}</h2>
+      <div className="text-dark-black m-auto flex w-full max-w-[670px] flex-col gap-6 leading-[160%]">
+        {paragraphs.map((paragraph, index) => (
+          <div
+            dangerouslySetInnerHTML={{ __html: paragraph }}
+            key={`${index}-${paragraph}`}
+          />
+        ))}
+      </div>
     </section>
   )
 }

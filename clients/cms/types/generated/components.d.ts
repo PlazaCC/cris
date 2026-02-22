@@ -111,7 +111,7 @@ export interface PortfolioSkillItem extends Struct.ComponentSchema {
 export interface SharedResponsiveImage extends Struct.ComponentSchema {
   collectionName: 'components_shared_responsive_images'
   info: {
-    description: 'Image with desktop and mobile variants'
+    description: 'Image for desktop and mobile'
     displayName: 'Responsive Image'
   }
   attributes: {
@@ -123,8 +123,8 @@ export interface SharedResponsiveImage extends Struct.ComponentSchema {
 export interface SharedSeo extends Struct.ComponentSchema {
   collectionName: 'components_shared_seos'
   info: {
-    description: ''
-    displayName: 'Seo'
+    description: 'Search and sharing metadata'
+    displayName: 'SEO'
     icon: 'allergies'
     name: 'Seo'
   }
@@ -132,6 +132,18 @@ export interface SharedSeo extends Struct.ComponentSchema {
     metaDescription: Schema.Attribute.Text & Schema.Attribute.Required
     metaTitle: Schema.Attribute.String & Schema.Attribute.Required
     shareImage: Schema.Attribute.Media<'images'>
+  }
+}
+
+export interface SharedSocialLink extends Struct.ComponentSchema {
+  collectionName: 'components_shared_social_links'
+  info: {
+    description: 'Social media link with title and URL'
+    displayName: 'Social Link'
+  }
+  attributes: {
+    title: Schema.Attribute.String & Schema.Attribute.Required
+    url: Schema.Attribute.String & Schema.Attribute.Required
   }
 }
 
@@ -149,6 +161,7 @@ declare module '@strapi/strapi' {
       'portfolio.skill-item': PortfolioSkillItem
       'shared.responsive-image': SharedResponsiveImage
       'shared.seo': SharedSeo
+      'shared.social-link': SharedSocialLink
     }
   }
 }

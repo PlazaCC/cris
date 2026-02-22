@@ -105,6 +105,42 @@ Diretriz de evolução:
 3. Migrar página a página de mock para dados reais via Query hooks.
 4. Criar mapeadores `Strapi -> Domain` por recurso (about, article, author, etc).
 
+### 5.1) Single types modulares no CMS
+
+Para manter organização e modularidade, dividir single types por responsabilidade:
+
+- `Global`: apenas `siteName`, `siteDescription`, `favicon`, `defaultSeo`.
+- `Hero`: conteúdos do hero (home).
+- `Footer`: conteúdos do footer.
+
+Regras:
+
+1. UI não deve conter dados mockados como fallback visual; mocks devem ficar apenas na seed do CMS.
+2. Componentes devem consumir apenas dados vindos do Strapi (via hooks/adapters).
+3. Em estados de erro/carregamento, preservar a base de estilização da sessão.
+
+### 5.2) Nomenclatura de campos (UX do editor)
+
+Os nomes dos campos no Strapi sao exibidos como labels no Content Manager.
+Padrao: manter nomes curtos, em ingles e amigaveis para editores.
+Para mudar labels, renomear o campo no Content-type Builder e revisar o web.
+
+### 5.3) Mudancas no Strapi exigem revisao no Web
+
+Qualquer alteracao de schema/fields no Strapi deve ser refletida na web:
+
+- Zod schemas em `features/*/schemas.ts`.
+- Adapters `Strapi -> Domain` em `lib/adapters/*`.
+- Hooks de dados em `features/*/hooks`.
+- Endpoints em `lib/api/endpoints.ts`.
+- Componentes/paginas consumidores.
+
+### 5.4) Campos nulos no Strapi
+
+Single types podem retornar `null` quando ainda nao foram preenchidos no CMS.
+Os schemas Zod do web devem aceitar `null` em campos opcionais e mapear para
+valores padrao no adapter, evitando estados de erro indevidos.
+
 ## 6) Convenções e qualidade
 
 - TypeScript strict no web deve permanecer habilitado.

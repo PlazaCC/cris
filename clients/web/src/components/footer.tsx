@@ -1,24 +1,14 @@
+import { ErrorState } from '@/components/feedback/error-state'
+import { LoadingState } from '@/components/feedback/loading-state'
+import { useFooter } from '@/features/footer/hooks/use-footer'
+import type { SocialLink } from '@/interrfaces'
 import { cn } from '@/lib/utils'
 import { useNavigationStore } from '@/stores/navigation-store'
 import { motion } from 'framer-motion'
 
-const footerLinks = [
-  {
-    title: 'E-mail',
-    href: 'mailto:contato@plazacontabil.com.br',
-  },
-  {
-    title: 'Linked In',
-    href: 'mailto:contato@plazacontabil.com.br',
-  },
-  {
-    title: 'Instagram',
-    href: 'mailto:contato@plazacontabil.com.br',
-  },
-]
-
 export const Footer = () => {
   const canNavigate = useNavigationStore((state) => state.canNavigate)
+  const { data: footer, isLoading, error, refetch } = useFooter()
 
   return (
     <div className="overflow-hidden">
@@ -40,52 +30,74 @@ export const Footer = () => {
         }}
       >
         <div className="m-auto flex max-w-[1210px] flex-col px-10 py-16">
-          <div className="flex items-center justify-between">
-            <motion.h2
-              className="text-off-white text-[262px] font-bold"
-              animate={{
-                translateY: canNavigate ? 0 : '-50%',
-              }}
-              transition={{
-                duration: 0.5,
-                delay: 0,
-                ease: [0.6, 0, 0.8, 0.2],
-              }}
-            >
-              unk
-            </motion.h2>
-            <motion.ul
-              className="flex w-[439px] flex-col"
-              animate={{
-                translateY: canNavigate ? 0 : '-50%',
-              }}
-              transition={{
-                duration: 0.5,
-                delay: 0,
-                ease: [0.6, 0, 0.8, 0.2],
-              }}
-            >
-              {footerLinks.map((link) => (
-                <FooterLink key={link.title} href={link.href}>
-                  {link.title}
-                </FooterLink>
-              ))}
-            </motion.ul>
-          </div>
-          <motion.div
-            className="text-off-white flex w-full justify-between"
-            animate={{
-              translateY: canNavigate ? 0 : '-200%',
-            }}
-            transition={{
-              duration: 0.5,
-              delay: 0,
-              ease: [0.6, 0, 0.8, 0.2],
-            }}
-          >
-            <p>2025 - Crisriano c</p>
-            <p>Colophon : Gabarito by Naipe</p>
-          </motion.div>
+          {isLoading || error || !footer ? (
+            <div className="flex min-h-[240px] items-center justify-center">
+              {isLoading && <LoadingState message="Carregando footer..." />}
+              {error && (
+                <ErrorState
+                  title="Não foi possível carregar o footer"
+                  message="Verifique se o Strapi está ativo e tente novamente."
+                  onRetry={() => {
+                    void refetch()
+                  }}
+                />
+              )}
+              {!isLoading && !error && !footer && (
+                <ErrorState title="Conteúdo do footer não encontrado" />
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between">
+                <motion.h2
+                  className="text-off-white text-[262px] font-bold"
+                  animate={{
+                    translateY: canNavigate ? 0 : '-50%',
+                  }}
+                  transition={{
+                    duration: 0.5,
+                    delay: 0,
+                    ease: [0.6, 0, 0.8, 0.2],
+                  }}
+                >
+                  {footer.brand}
+                </motion.h2>
+                <motion.ul
+                  className="flex w-[439px] flex-col"
+                  animate={{
+                    translateY: canNavigate ? 0 : '-50%',
+                  }}
+                  transition={{
+                    duration: 0.5,
+                    delay: 0,
+                    ease: [0.6, 0, 0.8, 0.2],
+                  }}
+                >
+                  {footer.links.map((link: SocialLink) => (
+                    <FooterLink key={link.title} href={link.url}>
+                      {link.title}
+                    </FooterLink>
+                  ))}
+                </motion.ul>
+              </div>
+              <motion.div
+                className="text-off-white flex w-full justify-between"
+                animate={{
+                  translateY: canNavigate ? 0 : '-200%',
+                }}
+                transition={{
+                  duration: 0.5,
+                  delay: 0,
+                  ease: [0.6, 0, 0.8, 0.2],
+                }}
+              >
+                <p>
+                  {footer.year} - {footer.copyright}
+                </p>
+                {footer.colophon && <p>{footer.colophon}</p>}
+              </motion.div>
+            </>
+          )}
         </div>
       </motion.footer>
     </div>

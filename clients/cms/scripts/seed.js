@@ -134,6 +134,24 @@ async function resolveMediaInBlocks(blocks) {
   return resolvedBlocks
 }
 
+function assertResolvedResponsiveImage(component, label) {
+  if (!component || component.__component !== 'shared.responsive-image') {
+    throw new Error(`Seed validation failed: ${label} inválido.`)
+  }
+
+  if (!component.desktop || typeof component.desktop === 'string') {
+    throw new Error(
+      `Seed validation failed: ${label}.desktop não foi resolvido para upload.`
+    )
+  }
+
+  if (!component.mobile || typeof component.mobile === 'string') {
+    throw new Error(
+      `Seed validation failed: ${label}.mobile não foi resolvido para upload.`
+    )
+  }
+}
+
 async function resolveGlobalPayloadMedia(payload) {
   const resolved = {
     ...payload,
@@ -151,6 +169,20 @@ async function resolveGlobalPayloadMedia(payload) {
       resolved.defaultSeo.shareImage
     )
   }
+
+  return resolved
+}
+
+async function resolveHeroPayloadMedia(payload) {
+  const resolved = {
+    ...payload,
+  }
+
+  if (resolved.image?.__component === 'shared.responsive-image') {
+    resolved.image = await resolveResponsiveImage(resolved.image)
+  }
+
+  assertResolvedResponsiveImage(resolved.image, 'hero.image')
 
   return resolved
 }
@@ -192,22 +224,39 @@ async function resolveAboutPayload(payload) {
   return resolved
 }
 
+async function findFirstWithAnyStatus(uid, params = {}) {
+  const published = await strapi.documents(uid).findFirst({
+    ...params,
+    status: 'published',
+  })
+
+  if (published?.documentId) {
+    return published
+  }
+
+  return strapi.documents(uid).findFirst({
+    ...params,
+    status: 'draft',
+  })
+}
+
 async function upsertSingleType(uid, data) {
-  const existing = await strapi.documents(uid).findFirst()
+  const existing = await findFirstWithAnyStatus(uid)
 
   if (existing?.documentId) {
     await strapi.documents(uid).update({
       documentId: existing.documentId,
       data,
+      status: 'published',
     })
     return
   }
 
-  await strapi.documents(uid).create({ data })
+  await strapi.documents(uid).create({ data, status: 'published' })
 }
 
 async function upsertProject(project) {
-  const existing = await strapi.documents('api::project.project').findFirst({
+  const existing = await findFirstWithAnyStatus('api::project.project', {
     filters: {
       slug: {
         $eq: project.slug,
@@ -215,24 +264,23 @@ async function upsertProject(project) {
     },
   })
 
-  const data = {
-    ...project,
-    publishedAt: new Date().toISOString(),
-  }
-
   if (existing?.documentId) {
     await strapi.documents('api::project.project').update({
       documentId: existing.documentId,
-      data,
+      data: project,
+      status: 'published',
     })
     return
   }
 
-  await strapi.documents('api::project.project').create({ data })
+  await strapi.documents('api::project.project').create({
+    data: project,
+    status: 'published',
+  })
 }
 
 async function upsertBadge(badge) {
-  const existing = await strapi.documents('api::badge.badge').findFirst({
+  const existing = await findFirstWithAnyStatus('api::badge.badge', {
     filters: {
       name: {
         $eq: badge.name,
@@ -246,6 +294,7 @@ async function upsertBadge(badge) {
 
   const created = await strapi.documents('api::badge.badge').create({
     data: badge,
+    status: 'published',
   })
 
   return created
@@ -289,12 +338,56 @@ async function setPublicPermissions(permissionsByController) {
   }
 }
 
+async function assertPublishedSingleType(uid, label) {
+  const published = await strapi.documents(uid).findFirst({
+    status: 'published',
+  })
+
+  if (!published?.documentId) {
+    throw new Error(`Seed validation failed: ${label} não está publicado.`)
+  }
+}
+
+async function assertPublishedCollectionCount(uid, expectedMinCount, label) {
+  const published = await strapi.documents(uid).findMany({
+    status: 'published',
+    pagination: { pageSize: 1000 },
+  })
+
+  if (!Array.isArray(published) || published.length < expectedMinCount) {
+    throw new Error(
+      `Seed validation failed: esperado ao menos ${expectedMinCount} ${label} publicados, encontrado ${published?.length ?? 0}.`
+    )
+  }
+}
+
+async function validateSeedPublication() {
+  await assertPublishedSingleType('api::global.global', 'global')
+  await assertPublishedSingleType('api::hero.hero', 'hero')
+  await assertPublishedSingleType('api::footer.footer', 'footer')
+  await assertPublishedSingleType('api::about.about', 'about')
+  await assertPublishedCollectionCount(
+    'api::badge.badge',
+    seedData.badges?.length ?? 0,
+    'badges'
+  )
+  await assertPublishedCollectionCount(
+    'api::project.project',
+    seedData.projects?.length ?? 0,
+    'projetos'
+  )
+}
+
 async function runSeed() {
   const resolvedGlobal = await resolveGlobalPayloadMedia(seedData.global)
+  const resolvedHero = await resolveHeroPayloadMedia(seedData.hero)
   const resolvedAbout = await resolveAboutPayload(seedData.about)
+  const resolvedFooter = seedData.footer
 
   await upsertSingleType('api::global.global', resolvedGlobal)
+  await upsertSingleType('api::hero.hero', resolvedHero)
   await upsertSingleType('api::about.about', resolvedAbout)
+  await upsertSingleType('api::footer.footer', resolvedFooter)
 
   // Create badges first
   for (const badge of seedData.badges ?? []) {
@@ -308,6 +401,7 @@ async function runSeed() {
   }
 
   await setPublicPermissions(seedData.permissions ?? {})
+  await validateSeedPublication()
 }
 
 async function main() {

@@ -1,21 +1,54 @@
-export interface PageAboutResponse {
-  hero: {
-    title: string
-    description: string
-    image: {
-      desktop: string
-      mobile: string
-    }
-  }
-  clients: string[]
-  skills: string[]
+export type ResponsiveImage = {
+  desktop: string
+  mobile: string
 }
 
-export type Block =
+export type Badge = {
+  documentId: string
+  name: string
+  slug?: string
+}
+
+export type AboutItem = {
+  name: string
+}
+
+export type AboutData = {
+  title: string
+  body: string
+  clients: AboutItem[]
+  skills: AboutItem[]
+  image: ResponsiveImage
+  email: string
+}
+
+export type SocialLink = {
+  title: string
+  url: string
+}
+
+export type HeroData = {
+  highlight: string
+  title: string
+  subtitle: string
+  name: string
+  description: string
+  image: ResponsiveImage
+}
+
+export type FooterData = {
+  brand: string
+  links: SocialLink[]
+  year: string
+  copyright: string
+  colophon?: string
+}
+
+export type ProjectBlock =
   | {
       type: 'scope'
       title: string
-      description: string
+      paragraphs: string[]
     }
   | {
       type: 'quote-title'
@@ -23,14 +56,11 @@ export type Block =
     }
   | {
       type: 'paragraph'
-      text: string[]
+      items: string[]
     }
   | {
-      type: 'image'
-      images: {
-        desktop: string
-        mobile: string
-      }[]
+      type: 'images'
+      images: ResponsiveImage[]
     }
   | {
       type: 'results'
@@ -41,18 +71,25 @@ export type Block =
       }[]
     }
 
-export interface Project {
+export type Project = {
+  documentId: string
+  slug: string
   title: string
-  tags: string[]
   description: string
   year: string
-  image: {
-    desktop: string
-    mobile: string
-  }
+  blurColor: string
+  badges: string[]
+  coverImages: ResponsiveImage
+  blocks: ProjectBlock[]
 }
 
-export interface ProjectsResponse {
-  projects: Project[]
-  blocks: Block[]
+export type GlobalData = {
+  siteName: string
+  siteDescription: string
+  favicon: string
+  defaultSeo: {
+    metaTitle: string
+    metaDescription: string
+    shareImage: string
+  }
 }

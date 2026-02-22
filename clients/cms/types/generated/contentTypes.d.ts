@@ -494,10 +494,43 @@ export interface ApiBadgeBadge extends Struct.CollectionTypeSchema {
   }
 }
 
+export interface ApiFooterFooter extends Struct.SingleTypeSchema {
+  collectionName: 'footers'
+  info: {
+    description: 'Footer content'
+    displayName: 'Footer'
+    pluralName: 'footers'
+    singularName: 'footer'
+  }
+  options: {
+    draftAndPublish: false
+  }
+  attributes: {
+    brand: Schema.Attribute.String & Schema.Attribute.Required
+    colophon: Schema.Attribute.String
+    copyright: Schema.Attribute.String & Schema.Attribute.Required
+    createdAt: Schema.Attribute.DateTime
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private
+    links: Schema.Attribute.Component<'shared.social-link', true>
+    locale: Schema.Attribute.String & Schema.Attribute.Private
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::footer.footer'
+    > &
+      Schema.Attribute.Private
+    publishedAt: Schema.Attribute.DateTime
+    updatedAt: Schema.Attribute.DateTime
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private
+    year: Schema.Attribute.String & Schema.Attribute.Required
+  }
+}
+
 export interface ApiGlobalGlobal extends Struct.SingleTypeSchema {
   collectionName: 'globals'
   info: {
-    description: 'Define global settings'
+    description: 'Global site settings'
     displayName: 'Global'
     pluralName: 'globals'
     singularName: 'global'
@@ -520,6 +553,38 @@ export interface ApiGlobalGlobal extends Struct.SingleTypeSchema {
     publishedAt: Schema.Attribute.DateTime
     siteDescription: Schema.Attribute.Text & Schema.Attribute.Required
     siteName: Schema.Attribute.String & Schema.Attribute.Required
+    updatedAt: Schema.Attribute.DateTime
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private
+  }
+}
+
+export interface ApiHeroHero extends Struct.SingleTypeSchema {
+  collectionName: 'heroes'
+  info: {
+    description: 'Home hero content'
+    displayName: 'Home Hero'
+    pluralName: 'heroes'
+    singularName: 'hero'
+  }
+  options: {
+    draftAndPublish: false
+  }
+  attributes: {
+    createdAt: Schema.Attribute.DateTime
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private
+    description: Schema.Attribute.Text & Schema.Attribute.Required
+    highlight: Schema.Attribute.String & Schema.Attribute.Required
+    image: Schema.Attribute.Component<'shared.responsive-image', false> &
+      Schema.Attribute.Required
+    locale: Schema.Attribute.String & Schema.Attribute.Private
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::hero.hero'> &
+      Schema.Attribute.Private
+    name: Schema.Attribute.String & Schema.Attribute.Required
+    publishedAt: Schema.Attribute.DateTime
+    subtitle: Schema.Attribute.String & Schema.Attribute.Required
+    title: Schema.Attribute.String & Schema.Attribute.Required
     updatedAt: Schema.Attribute.DateTime
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private
@@ -1085,7 +1150,9 @@ declare module '@strapi/strapi' {
       'admin::user': AdminUser
       'api::about.about': ApiAboutAbout
       'api::badge.badge': ApiBadgeBadge
+      'api::footer.footer': ApiFooterFooter
       'api::global.global': ApiGlobalGlobal
+      'api::hero.hero': ApiHeroHero
       'api::project.project': ApiProjectProject
       'plugin::content-releases.release': PluginContentReleasesRelease
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction

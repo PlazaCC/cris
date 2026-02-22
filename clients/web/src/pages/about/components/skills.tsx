@@ -1,17 +1,8 @@
-const skills = [
-  'Visual Design',
-  '3D',
-  'Branding',
-  'Facilitation',
-  'Motion Graphics',
-  'Photography',
-  'Type Design',
-  'Art Direction',
+type AboutSkillsProps = {
+  skills: string[]
+}
 
-  'UI Animation',
-]
-
-export const AboutSkills = () => {
+export const AboutSkills = ({ skills }: AboutSkillsProps) => {
   return (
     <section className="bg-off-white py-32">
       <div className="mx-auto flex max-w-[1440px] items-center justify-between px-[155px]">

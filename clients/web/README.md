@@ -1,54 +1,38 @@
-# React + TypeScript + Vite
+# CRIS Web (React + Vite)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend do portfólio integrado ao Strapi (`clients/cms`) com:
 
-Currently, two official plugins are available:
+- TanStack Query para data fetching e cache
+- Adapters DTO → Domain com validação de fronteira
+- Hooks por feature (`about`, `projects`, `global`, `badges`)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Variáveis de ambiente
 
-## Expanding the ESLint configuration
+Copie `.env.example` para `.env` e ajuste se necessário:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```bash
+VITE_STRAPI_API_URL=http://localhost:1337
+VITE_STRAPI_API_TOKEN=
+VITE_DEV_MODE=true
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Comandos
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+yarn workspace client-web dev
+yarn workspace client-web build
+yarn workspace client-web lint
 ```
+
+## Fluxo local completo
+
+1. Suba o CMS (`clients/cms`) e rode o seed.
+2. Garanta permissões públicas para `about`, `project`, `badge` e `global`.
+3. Suba o web e acesse a aplicação.
+
+## Arquitetura (resumo)
+
+- `src/lib/api`: client HTTP e endpoints do Strapi
+- `src/lib/adapters`: mapeamento e isolamento de contrato externo
+- `src/features/*/hooks`: hooks de query por contexto
+- `src/pages/*`: composição de UI sem acesso direto à API

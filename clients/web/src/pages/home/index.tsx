@@ -1,3 +1,10 @@
+import { ErrorState } from '@/components/feedback/error-state'
+import { LoadingState } from '@/components/feedback/loading-state'
+import { ResponsiveImageView } from '@/components/ui/responsive-image'
+import { useGlobal } from '@/features/global/hooks/use-global'
+import { useHero } from '@/features/hero/hooks/use-hero'
+import { useProjects } from '@/features/projects/hooks/use-projects'
+import type { Project, ResponsiveImage } from '@/interrfaces'
 import { cn } from '@/lib/utils'
 import { locomotiveScroll } from '@/main'
 import { createRoute } from '@tanstack/react-router'
@@ -14,38 +21,145 @@ HomePage.route = createRoute({
 export function HomePage() {
   return (
     <div className="m-auto flex w-full max-w-[1920px] flex-col items-center justify-center overflow-visible">
-      <HomeHero />
-      <Projects />
+      <HeroSection />
+      <ProjectsSection />
     </div>
   )
 }
 
-export const HomeHero = () => {
+function HeroSection() {
+  const {
+    data: global,
+    isLoading: isGlobalLoading,
+    error: globalError,
+    refetch: refetchGlobal,
+  } = useGlobal()
+  const {
+    data: hero,
+    isLoading: isHeroLoading,
+    error: heroError,
+    refetch: refetchHero,
+  } = useHero()
+
+  const isLoading = isGlobalLoading || isHeroLoading
+  const error = globalError || heroError
+  const hasData = Boolean(global && hero)
+
+  // Mantém estrutura visual mesmo com erro/loading
+  if (isLoading || error || !hasData) {
+    return (
+      <div className="h-dvh w-full px-10 pt-9 pb-[115px]">
+        <div className="bg-off-white relative flex h-full w-full flex-col items-center justify-center rounded-4xl p-[53px] shadow-2xl">
+          {isLoading && <LoadingState message="Carregando..." />}
+          {error && (
+            <ErrorState
+              title="Não foi possível carregar o conteúdo"
+              message="Verifique se o Strapi está ativo e tente novamente."
+              onRetry={() => {
+                void refetchGlobal()
+                void refetchHero()
+              }}
+            />
+          )}
+          {!isLoading && !error && !hasData && (
+            <ErrorState title="Conteúdo não encontrado" />
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <HomeHero
+      siteName={global.siteName}
+      highlight={hero.highlight}
+      title={hero.title}
+      subtitle={hero.subtitle}
+      name={hero.name}
+      description={hero.description}
+      image={hero.image}
+    />
+  )
+}
+
+function ProjectsSection() {
+  const { data: projects, isLoading, error, refetch } = useProjects()
+
+  // Mantém estrutura visual mesmo com erro/loading
+  if (isLoading || error || !projects || projects.length === 0) {
+    return (
+      <section className="relative w-full max-w-[1920px] px-10 py-20">
+        <div className="flex min-h-[50vh] items-center justify-center">
+          {isLoading && <LoadingState message="Carregando projetos..." />}
+          {error && (
+            <ErrorState
+              title="Não foi possível carregar os projetos"
+              message="Verifique se o Strapi está ativo e tente novamente."
+              onRetry={() => {
+                void refetch()
+              }}
+            />
+          )}
+          {!isLoading && !error && (!projects || projects.length === 0) && (
+            <ErrorState title="Nenhum projeto publicado" />
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  return <Projects projects={projects} />
+}
+
+export const HomeHero = ({
+  siteName,
+  highlight,
+  title,
+  subtitle,
+  name,
+  description,
+  image,
+}: {
+  siteName: string
+  highlight: string
+  title: string
+  subtitle: string
+  name: string
+  description: string
+  image?: ResponsiveImage
+}) => {
+  const [descriptionLine1 = '', descriptionLine2 = ''] = description.split('\n')
+
   return (
     <div className="h-dvh w-full px-10 pt-9 pb-[115px]">
       <div className="bg-off-white relative flex h-full w-full flex-col justify-between rounded-4xl p-[53px] pb-[95px] shadow-2xl">
         <div className="absolute top-0 left-0 z-1 h-full w-full">
-          <img
-            className="h-full w-full object-contain"
-            src="./images/header-1.png"
-          />
+          {image?.desktop || image?.mobile ? (
+            <ResponsiveImageView
+              alt={siteName}
+              fetchPriority="high"
+              image={image}
+              imgClassName="h-full w-full object-contain"
+              loading="eager"
+            />
+          ) : null}
         </div>
         <span className="relative text-[32px] leading-[100%] font-bold text-black">
-          unk
+          {siteName}
         </span>
         <div className="relative z-1 flex flex-col gap-16">
           <h1 className="text-[88px] leading-[98%]">
             <span className="after:bg-blue relative z-10 after:absolute after:bottom-[10px] after:left-0 after:-z-10 after:h-[8px] after:w-full after:content-['']">
-              Polymath
+              {highlight}
             </span>{' '}
-            designer, in a <br />
-            relationship with interactivity
+            {title} <br />
+            {subtitle}
           </h1>
           <p className="text-lg">
-            Hi, I'm <span className="text-blue">Cris</span>, a multidisciplinary
-            designer who combines different design approaches to
+            Hi, I'm <span className="text-blue">{name}</span>,{' '}
+            {descriptionLine1}
             <br />
-            solve my clients' needs.
+            {descriptionLine2}
           </p>
         </div>
       </div>
@@ -53,13 +167,7 @@ export const HomeHero = () => {
   )
 }
 
-const projects = [
-  { id: 1, image: './images/project-1.png' },
-  { id: 2, image: './images/project-2.png' },
-  { id: 3, image: './images/project-1.png' },
-]
-
-export const Projects = () => {
+export const Projects = ({ projects }: { projects: Project[] }) => {
   const sectionRef = useRef<HTMLElement>(null)
   const isSectionInView = useInView(sectionRef, { amount: 0.25 })
   const [activeIndex, setActiveIndex] = useState(0)
@@ -87,11 +195,13 @@ export const Projects = () => {
         <ul className="flex flex-col gap-9">
           {projects.map((project, index) => (
             <ProjectCard
-              key={project.id}
+              key={project.documentId || project.slug || index}
               ref={(el) => {
                 projectRefs.current[index] = el
               }}
-              image={project.image}
+              title={project.title}
+              badges={project.badges}
+              image={project.coverImages}
               onInView={() => setActiveIndex(index)}
             />
           ))}
@@ -110,12 +220,14 @@ export const Projects = () => {
 }
 
 type ProjectCardProps = {
-  image: string
+  title: string
+  badges: string[]
+  image: Project['coverImages']
   onInView: () => void
 }
 
 const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
-  ({ image, onInView }, ref) => {
+  ({ image, title, badges, onInView }, ref) => {
     return (
       <motion.div
         ref={ref}
@@ -128,20 +240,23 @@ const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
         }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
       >
-        <img className="h-full w-full object-cover" src={image} />
+        <ResponsiveImageView
+          alt={title}
+          image={image}
+          imgClassName="h-full w-full object-cover"
+        />
 
         <div className="absolute bottom-[30px] left-[35px] flex w-full max-w-[360px] flex-col gap-4 rounded-2xl bg-white px-8 py-4">
-          <h2 className="text-[32px]">Lovesicky</h2>
+          <h2 className="text-[32px]">{title}</h2>
           <ul className="flex gap-2">
-            <li className="bg-blue rounded-full px-4 py-1 text-xs text-white">
-              art direction
-            </li>
-            <li className="bg-blue rounded-full px-4 py-1 text-xs text-white">
-              3D
-            </li>
-            <li className="bg-blue rounded-full px-4 py-1 text-xs text-white">
-              branding
-            </li>
+            {badges.map((badge) => (
+              <li
+                className="bg-blue rounded-full px-4 py-1 text-xs text-white"
+                key={badge}
+              >
+                {badge}
+              </li>
+            ))}
           </ul>
         </div>
       </motion.div>

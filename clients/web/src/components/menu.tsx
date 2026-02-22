@@ -1,3 +1,4 @@
+import { useAbout } from '@/features/about/hooks/use-about'
 import { cn } from '@/lib/utils'
 import { useNavigationStore } from '@/stores/navigation-store'
 import { Link, useLocation } from '@tanstack/react-router'
@@ -48,6 +49,7 @@ const navbarVariants: Variants = {
 export const Menu = () => {
   const { pathname } = useLocation()
   const canNavigate = useNavigationStore((state) => state.canNavigate)
+  const { data: about } = useAbout()
 
   const activeItem = menuItems.find((item) => item.path === pathname)?.label
 
@@ -94,7 +96,8 @@ export const Menu = () => {
         ))}
 
         {/* Botão Get in Touch */}
-        <li
+        <a
+          href={about?.email ? `mailto:${about.email}` : '#'}
           className={cn(
             'flex cursor-pointer items-center gap-2.5 rounded-full px-4 py-2 text-white hover:bg-white/10 active:bg-white/30',
             !canNavigate && 'pointer-events-none'
@@ -110,7 +113,7 @@ export const Menu = () => {
           >
             <ArrowRight className="size-4" />
           </motion.div>
-        </li>
+        </a>
       </ul>
     </motion.nav>
   )

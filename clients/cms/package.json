@@ -8,7 +8,6 @@
     "console": "strapi console",
     "deploy": "strapi deploy",
     "dev": "strapi develop",
-    "develop": "strapi develop",
     "seed": "node ./scripts/seed.js",
     "start": "strapi start",
     "strapi": "strapi",

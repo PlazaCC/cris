@@ -4,6 +4,13 @@
 
 Este documento define o mapeamento entre os DTOs retornados pela API do Strapi e os tipos de domínio usados no cliente web.
 
+## Atualização 2026-02 (estado atual)
+
+- O CMS atual usa Strapi v5 com payloads achatados (campos em `data[]`), mantendo fallback para `attributes` quando necessário.
+- `Project.badges` agora é relação many-to-many com `api::badge.badge`.
+- Blocos de projeto usam componentes repeatable (`portfolio.*`) e devem ser mapeados por discriminador `__component`.
+- URLs de mídia devem ser normalizadas para URL absoluta via `VITE_STRAPI_API_URL`.
+
 **Responsabilidade:** Camada de adaptadores (lib/adapters ou features/\*/adapters) deve implementar funções de mapeamento que transformam DTOs em tipos de domínio.
 
 **Princípio:** DTOs não devem vazar para camadas internas. Componentes visuais e lógica de negócio devem consumir apenas tipos de domínio.

@@ -3,7 +3,9 @@
     "about": ["find", "findOne"],
     "project": ["find", "findOne"],
     "badge": ["find", "findOne"],
-    "global": ["find", "findOne"]
+    "global": ["find", "findOne"],
+    "hero": ["find", "findOne"],
+    "footer": ["find", "findOne"]
   },
   "badges": [
     { "name": "art direction" },
@@ -22,6 +24,41 @@
       "metaDescription": "Portfólio com projetos, processo e resultados de design.",
       "shareImage": "default-image.png"
     }
+  },
+  "hero": {
+    "highlight": "Polymath",
+    "title": "designer, in a",
+    "subtitle": "relationship with interactivity",
+    "name": "Cris",
+    "description": "a multidisciplinary designer who combines different design approaches to\nsolve my clients' needs.",
+    "image": {
+      "__component": "shared.responsive-image",
+      "desktop": "header-1.png",
+      "mobile": "header-1.png"
+    }
+  },
+  "footer": {
+    "brand": "unk",
+    "links": [
+      {
+        "__component": "shared.social-link",
+        "title": "E-mail",
+        "url": "mailto:contato@plazacontabil.com.br"
+      },
+      {
+        "__component": "shared.social-link",
+        "title": "Linked In",
+        "url": "https://linkedin.com/in/contato"
+      },
+      {
+        "__component": "shared.social-link",
+        "title": "Instagram",
+        "url": "https://instagram.com/contato"
+      }
+    ],
+    "year": "2025",
+    "copyright": "Crisriano c",
+    "colophon": "Colophon : Gabarito by Naipe"
   },
   "about": {
     "title": "A Swiss Knive designer made in Brazil.",

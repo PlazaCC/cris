@@ -1,7 +1,13 @@
+import { ImagesBlock } from '@/components/blocks/images-block'
 import { ParagraphsBlock } from '@/components/blocks/paragraphs-block'
 import { ProjectProgressionBlock } from '@/components/blocks/projetct-progression'
 import { QuoteTitle } from '@/components/blocks/quote-title'
+import { ResultsBlock } from '@/components/blocks/results-block'
 import { ScopeBlock } from '@/components/blocks/scope'
+import { ErrorState } from '@/components/feedback/error-state'
+import { LoadingState } from '@/components/feedback/loading-state'
+import { useProjects } from '@/features/projects/hooks/use-projects'
+import type { ProjectBlock } from '@/interrfaces'
 import { createRoute } from '@tanstack/react-router'
 import { AppLayout } from '../_layout'
 
@@ -12,27 +18,64 @@ WorkPage.route = createRoute({
 })
 
 export function WorkPage() {
+  const { data: projects, isLoading, error, refetch } = useProjects()
+
+  if (isLoading) {
+    return <LoadingState message="Carregando projeto..." />
+  }
+
+  if (error) {
+    return (
+      <ErrorState
+        title="Não foi possível carregar o projeto"
+        message="Verifique se o Strapi está ativo e tente novamente."
+        onRetry={() => {
+          void refetch()
+        }}
+      />
+    )
+  }
+
+  const project = projects?.[0]
+
+  if (!project) {
+    return <ErrorState title="Nenhum projeto encontrado" />
+  }
+
+  const renderBlock = (block: ProjectBlock, index: number) => {
+    if (block.type === 'scope') {
+      return (
+        <ScopeBlock
+          key={index}
+          paragraphs={block.paragraphs}
+          title={block.title}
+        />
+      )
+    }
+
+    if (block.type === 'quote-title') {
+      return <QuoteTitle key={index} text={block.text} />
+    }
+
+    if (block.type === 'paragraph') {
+      return <ParagraphsBlock items={block.items} key={index} />
+    }
+
+    if (block.type === 'images') {
+      return <ImagesBlock images={block.images} key={index} />
+    }
+
+    return <ResultsBlock key={index} results={block.results} />
+  }
+
   return (
     <>
       <div className="flex flex-col items-center justify-center">
-        <h1>Bem vindo ao Workspace do Plaza</h1>
-        <ScopeBlock
-          title="Scope and structure"
-          description="<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse velit ante, accumsan ac lacus at, pulvinar aliquam velit. Sed dictum neque at justo dictum mattis a a nibh. Nunc scelerisque leo vitae erat sagittis, nec egestas dui pulvinar. Vestibulum nulla augue, vehicula id tortor ut, sagittis consequat nisl. Pellentesque eleifend semper nunc ac tincidunt. Nam vehicula, elit vel consequat pellentesque, odio purus molestie odio, ut ultricies massa mauris id nunc. Nullam nisl lectus, hendrerit vitae dignissim a, tristique nec nunc. Nulla vel nisl eu nisl tempor vehicula. Phasellus placerat efficitur nulla.<br/><br/> Quail chicks need a feed that is: A. non-medicated, B. finely ground, and C. very high in protein. The best I could do for them was a turkey starter, pulverised and topped up with boiled egg to raise the protein content.
-</p>"
-        />
-        <QuoteTitle title="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse velit ante" />
-        <ParagraphsBlock
-          blocks={[
-            null,
-            {
-              text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse velit ante, accumsan ac lacus at, pulvinar aliquam velit. Sed dictum neque at justo dictum mattis a a nibh. Nunc scelerisque leo vitae erat sagittis, nec egestas dui pulvinar. Vestibulum nulla augue, vehicula id tortor ut, sagittis consequat nisl. Pellentesque eleifend semper nunc ac tincidunt. Nam vehicula, elit vel consequat pellentesque, odio purus molestie odio, ut ultricies massa mauris id nunc. Nullam nisl lectus, hendrerit vitae dignissim a, tristique nec nunc. Nulla vel nisl eu nisl tempor vehicula. Phasellus placerat efficitur nulla.',
-            },
-            {
-              text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse velit ante, accumsan ac lacus at, pulvinar aliquam velit. Sed dictum neque at justo dictum mattis a a nibh. Nunc scelerisque leo vitae erat sagittis, nec egestas dui pulvinar. Vestibulum nulla augue, vehicula id tortor ut, sagittis consequat nisl. Pellentesque eleifend semper nunc ac tincidunt. Nam vehicula, elit vel consequat pellentesque, odio purus molestie odio, ut ultricies massa mauris id nunc. Nullam nisl lectus, hendrerit vitae dignissim a, tristique nec nunc. Nulla vel nisl eu nisl tempor vehicula. Phasellus placerat efficitur nulla.',
-            },
-          ]}
-        />
+        <h1 className="mt-8 text-4xl font-bold">{project.title}</h1>
+        <p className="text-dark-black mt-3 max-w-[920px] text-center text-lg">
+          {project.description}
+        </p>
+        {project.blocks.map(renderBlock)}
         <ProjectProgressionBlock />
       </div>
     </>

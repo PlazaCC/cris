@@ -1,4 +1,5 @@
 import { Menu } from '@/components/menu'
+import { useGlobal } from '@/features/global/hooks/use-global'
 import { cn } from '@/lib/utils'
 import { useNavigationStore } from '@/stores/navigation-store'
 import {
@@ -26,10 +27,37 @@ AppLayout.route = createRoute({
 })
 
 export function AppLayout() {
+  const { data: global } = useGlobal()
   const matches = useMatches()
   const match = useMatch({ strict: false })
   const nextIndex = matches.findIndex((m) => m.id === match.id) + 1
   const nextMatch = matches[nextIndex]
+
+  useEffect(() => {
+    if (!global) {
+      return
+    }
+
+    if (global.defaultSeo.metaTitle) {
+      document.title = global.defaultSeo.metaTitle
+    }
+
+    const faviconHref = global.favicon
+    if (!faviconHref) {
+      return
+    }
+
+    const iconLink =
+      document.querySelector<HTMLLinkElement>("link[rel='icon']") ??
+      document.createElement('link')
+
+    iconLink.rel = 'icon'
+    iconLink.href = faviconHref
+
+    if (!iconLink.parentElement) {
+      document.head.appendChild(iconLink)
+    }
+  }, [global])
 
   return (
     <div className={cn('relative w-full')}>

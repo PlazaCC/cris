@@ -1,23 +1,36 @@
-# 📝 Nome do projeto
+# CRIS
 
-**Nome do projeto** descrição sobre o projeto.
+Monorepo with the Strapi CMS and the React web client.
 
-## ✨ Tecnologias Utilizadas
+## Packages
 
-### 🌐 Web
+- `clients/cms`: Strapi v5 CMS
+- `clients/web`: React 19 + Vite 6 front end
 
-- **Vite** como bundler moderno e rápido.
-- Compartilhamento de código com o mobile para garantir consistência.
-- Utilização das mesmas bibliotecas: React Query, React Hook Form e Zod.
+## Requirements
 
-### 🧠 Validação e Tipagens
+- Node 22.x
+- Yarn 4.9.2
 
-- **Zod** para validação, definição de schemas e enums reutilizáveis.
+## Setup
 
-## 🧩 Estrutura do Projeto
+```bash
+yarn install
+```
 
-Organizado em um **monorepo** com **Yarn Workspaces**
+## Development
 
-## Layout
+```bash
+yarn dev
+```
 
-https://www.figma.com/design/wpKeDtZWDlRcwBXDVRvWce/Folio-2025--Copy-?node-id=0-1&p=f&t=Z25xljeR2rar3Sax-0
+Run a single package:
+
+```bash
+yarn workspace cris-cms dev
+yarn workspace client-web dev
+```
+
+## Docs
+
+Architecture and contribution rules live in `docs/engineering-rules.md`.
