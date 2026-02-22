@@ -11,10 +11,34 @@ Strapi v5 CMS that powers the portfolio content.
 
 ```bash
 yarn install
-yarn workspace cris-cms dev
+yarn workspace client-cms dev
+```
+
+## Docker
+
+Local CMS runs from the terminal. Docker is only for the database.
+
+```bash
+cp .env.example ../../.env
+docker compose -f ../../docker-compose.dev.yml up -d
+```
+
+Copy the CMS env and keep the database host as localhost.
+
+```bash
+cp .env.example .env
+```
+
+Production runs CMS and Web together.
+
+```bash
+cp .env.example ../../.env
+docker compose -f ../../docker-compose.yml up -d --build
 ```
 
 ## Seed data
+
+Run once after the first boot or whenever the database is reset.
 
 ```bash
 yarn workspace cris-cms seed
@@ -27,10 +51,11 @@ yarn workspace cris-cms seed
 ## Useful commands
 
 ```bash
-yarn workspace cris-cms build
-yarn workspace cris-cms start
-yarn workspace cris-cms console
-yarn workspace cris-cms generate:openapi
+yarn workspace client-cms seed
+yarn workspace client-cms build
+yarn workspace client-cms start
+yarn workspace client-cms console
+yarn workspace client-cms generate:openapi
 ```
 
 ## Data

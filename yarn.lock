@@ -8783,6 +8783,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"client-cms@workspace:clients/cms":
+  version: 0.0.0-use.local
+  resolution: "client-cms@workspace:clients/cms"
+  dependencies:
+    "@strapi/plugin-cloud": "npm:5.36.1"
+    "@strapi/plugin-users-permissions": "npm:5.36.1"
+    "@strapi/strapi": "npm:5.36.1"
+    "@types/node": "npm:^20"
+    "@types/react": "npm:^18"
+    "@types/react-dom": "npm:^18"
+    fs-extra: "npm:^10.0.0"
+    mime-types: "npm:^2.1.27"
+    pg: "npm:8.8.0"
+    react: "npm:^18.0.0"
+    react-dom: "npm:^18.0.0"
+    react-router-dom: "npm:^6.0.0"
+    styled-components: "npm:^6.0.0"
+    typescript: "npm:^5"
+  languageName: unknown
+  linkType: soft
+
 "client-web@workspace:clients/web":
   version: 0.0.0-use.local
   resolution: "client-web@workspace:clients/web"
@@ -9322,27 +9343,6 @@ __metadata:
   checksum: 10c0/e0fb76dff50c5eb47f2ea9b786c17f9425c66276025adee80876bdbf4a84ab72e899e56d3928431ab0cb057a105ef704df80fe5726ef0f7b1658f815521bdf09
   languageName: node
   linkType: hard
-
-"cris-cms@workspace:clients/cms":
-  version: 0.0.0-use.local
-  resolution: "cris-cms@workspace:clients/cms"
-  dependencies:
-    "@strapi/plugin-cloud": "npm:5.36.1"
-    "@strapi/plugin-users-permissions": "npm:5.36.1"
-    "@strapi/strapi": "npm:5.36.1"
-    "@types/node": "npm:^20"
-    "@types/react": "npm:^18"
-    "@types/react-dom": "npm:^18"
-    fs-extra: "npm:^10.0.0"
-    mime-types: "npm:^2.1.27"
-    pg: "npm:8.8.0"
-    react: "npm:^18.0.0"
-    react-dom: "npm:^18.0.0"
-    react-router-dom: "npm:^6.0.0"
-    styled-components: "npm:^6.0.0"
-    typescript: "npm:^5"
-  languageName: unknown
-  linkType: soft
 
 "cron-parser@npm:^4.2.0":
   version: 4.9.0

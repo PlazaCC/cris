@@ -8,7 +8,8 @@
     ]
   },
   "scripts": {
-    "dev": "yarn workspaces foreach --all --parallel --interlaced run dev"
+    "dev": "yarn workspaces foreach --all -i -p run dev",
+    "seed:cms": "yarn workspace client-cms seed"
   },
   "devDependencies": {
     "@types/node": "^24.0.10",

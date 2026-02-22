@@ -24,12 +24,42 @@ yarn install
 yarn dev
 ```
 
+Local CMS runs from the terminal. Docker is only for the database.
+
+```bash
+cp .env.example .env
+docker compose -f docker-compose.dev.yml up -d
+```
+
+Local CMS uses its own env file.
+
+```bash
+cp clients/cms/.env.example clients/cms/.env
+```
+
+First run requires seed:
+
+```bash
+yarn seed:cms
+```
+
 Run a single package:
 
 ```bash
-yarn workspace cris-cms dev
+yarn workspace client-cms dev
 yarn workspace client-web dev
 ```
+
+## Docker
+
+Production runs web and cms together:
+
+```bash
+cp .env.example .env
+docker compose -f docker-compose.yml up -d --build
+```
+
+See `clients/cms/README.md` for CMS details.
 
 ## Docs
 
