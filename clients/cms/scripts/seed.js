@@ -1,84 +1,45 @@
-'use strict';
+'use strict'
 
-const fs = require('fs-extra');
-const path = require('path');
-const mime = require('mime-types');
-const { categories, authors, articles, global, about } = require('../data/data.json');
-
-async function seedExampleApp() {
-  const shouldImportSeedData = await isFirstRun();
-
-  if (shouldImportSeedData) {
-    try {
-      console.log('Setting up the template...');
-      await importSeedData();
-      console.log('Ready to go');
-    } catch (error) {
-      console.log('Could not import seed data');
-      console.error(error);
-    }
-  } else {
-    console.log(
-      'Seed data has already been imported. We cannot reimport unless you clear your database first.'
-    );
-  }
-}
-
-async function isFirstRun() {
-  const pluginStore = strapi.store({
-    environment: strapi.config.environment,
-    type: 'type',
-    name: 'setup',
-  });
-  const initHasRun = await pluginStore.get({ key: 'initHasRun' });
-  await pluginStore.set({ key: 'initHasRun', value: true });
-  return !initHasRun;
-}
-
-async function setPublicPermissions(newPermissions) {
-  // Find the ID of the public role
-  const publicRole = await strapi.query('plugin::users-permissions.role').findOne({
-    where: {
-      type: 'public',
-    },
-  });
-
-  // Create the new permissions and link them to the public role
-  const allPermissionsToCreate = [];
-  Object.keys(newPermissions).map((controller) => {
-    const actions = newPermissions[controller];
-    const permissionsToCreate = actions.map((action) => {
-      return strapi.query('plugin::users-permissions.permission').create({
-        data: {
-          action: `api::${controller}.${controller}.${action}`,
-          role: publicRole.id,
-        },
-      });
-    });
-    allPermissionsToCreate.push(...permissionsToCreate);
-  });
-  await Promise.all(allPermissionsToCreate);
-}
+const fs = require('fs-extra')
+const path = require('path')
+const mime = require('mime-types')
+const seedData = require('../data/data.json')
 
 function getFileSizeInBytes(filePath) {
-  const stats = fs.statSync(filePath);
-  const fileSizeInBytes = stats['size'];
-  return fileSizeInBytes;
+  const stats = fs.statSync(filePath)
+  return stats.size
+}
+
+function resolveFilePath(fileName) {
+  const candidates = [
+    path.join(__dirname, '..', 'data', 'uploads', fileName),
+    path.join(__dirname, '..', '..', 'web', 'public', 'images', fileName),
+  ]
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) return candidate
+  }
+
+  return null
 }
 
 function getFileData(fileName) {
-  const filePath = path.join('data', 'uploads', fileName);
-  // Parse the file metadata
-  const size = getFileSizeInBytes(filePath);
-  const ext = fileName.split('.').pop();
-  const mimeType = mime.lookup(ext || '') || '';
+  const resolvedFilePath = resolveFilePath(fileName)
+
+  if (!resolvedFilePath) {
+    throw new Error(`Arquivo não encontrado para seed: ${fileName}`)
+  }
+
+  const size = getFileSizeInBytes(resolvedFilePath)
+  const ext = path.extname(fileName).replace('.', '')
+  const mimeType = mime.lookup(ext || '') || ''
 
   return {
-    filepath: filePath,
+    filepath: resolvedFilePath,
     originalFileName: fileName,
     size,
     mimetype: mimeType,
-  };
+  }
 }
 
 async function uploadFile(file, name) {
@@ -89,186 +50,221 @@ async function uploadFile(file, name) {
       files: file,
       data: {
         fileInfo: {
-          alternativeText: `An image uploaded to Strapi called ${name}`,
+          alternativeText: `Seed image ${name}`,
           caption: name,
           name,
         },
       },
-    });
+    })
 }
 
-// Create an entry and attach files if there are any
-async function createEntry({ model, entry }) {
-  try {
-    // Actually create the entry in Strapi
-    await strapi.documents(`api::${model}.${model}`).create({
-      data: entry,
-    });
-  } catch (error) {
-    console.error({ model, entry, error });
+async function getOrUploadFile(fileName) {
+  const fileNameWithoutExtension = path.parse(fileName).name
+
+  const existing = await strapi.query('plugin::upload.file').findOne({
+    where: {
+      name: fileNameWithoutExtension,
+    },
+  })
+
+  if (existing) {
+    return existing
   }
+
+  const fileData = getFileData(fileName)
+  const [uploaded] = await uploadFile(fileData, fileNameWithoutExtension)
+
+  return uploaded
 }
 
-async function checkFileExistsBeforeUpload(files) {
-  const existingFiles = [];
-  const uploadedFiles = [];
-  const filesCopy = [...files];
+async function resolveMediaInBlocks(blocks) {
+  const resolvedBlocks = []
 
-  for (const fileName of filesCopy) {
-    // Check if the file already exists in Strapi
-    const fileWhereName = await strapi.query('plugin::upload.file').findOne({
-      where: {
-        name: fileName.replace(/\..*$/, ''),
-      },
-    });
-
-    if (fileWhereName) {
-      // File exists, don't upload it
-      existingFiles.push(fileWhereName);
-    } else {
-      // File doesn't exist, upload it
-      const fileData = getFileData(fileName);
-      const fileNameNoExtension = fileName.split('.').shift();
-      const [file] = await uploadFile(fileData, fileNameNoExtension);
-      uploadedFiles.push(file);
-    }
-  }
-  const allFiles = [...existingFiles, ...uploadedFiles];
-  // If only one file then return only that file
-  return allFiles.length === 1 ? allFiles[0] : allFiles;
-}
-
-async function updateBlocks(blocks) {
-  const updatedBlocks = [];
   for (const block of blocks) {
-    if (block.__component === 'shared.media') {
-      const uploadedFiles = await checkFileExistsBeforeUpload([block.file]);
-      // Copy the block to not mutate directly
-      const blockCopy = { ...block };
-      // Replace the file name on the block with the actual file
-      blockCopy.file = uploadedFiles;
-      updatedBlocks.push(blockCopy);
-    } else if (block.__component === 'shared.slider') {
-      // Get files already uploaded to Strapi or upload new files
-      const existingAndUploadedFiles = await checkFileExistsBeforeUpload(block.files);
-      // Copy the block to not mutate directly
-      const blockCopy = { ...block };
-      // Replace the file names on the block with the actual files
-      blockCopy.files = existingAndUploadedFiles;
-      // Push the updated block
-      updatedBlocks.push(blockCopy);
-    } else {
-      // Just push the block as is
-      updatedBlocks.push(block);
+    if (
+      block.__component === 'shared.media' &&
+      typeof block.file === 'string'
+    ) {
+      resolvedBlocks.push({
+        ...block,
+        file: await getOrUploadFile(block.file),
+      })
+      continue
+    }
+
+    if (block.__component === 'shared.slider' && Array.isArray(block.files)) {
+      const files = []
+
+      for (const fileName of block.files) {
+        files.push(await getOrUploadFile(fileName))
+      }
+
+      resolvedBlocks.push({
+        ...block,
+        files,
+      })
+      continue
+    }
+
+    resolvedBlocks.push(block)
+  }
+
+  return resolvedBlocks
+}
+
+async function resolveGlobalPayloadMedia(payload) {
+  const resolved = {
+    ...payload,
+    defaultSeo: {
+      ...payload.defaultSeo,
+    },
+  }
+
+  if (typeof resolved.favicon === 'string') {
+    resolved.favicon = await getOrUploadFile(resolved.favicon)
+  }
+
+  if (typeof resolved.defaultSeo?.shareImage === 'string') {
+    resolved.defaultSeo.shareImage = await getOrUploadFile(
+      resolved.defaultSeo.shareImage
+    )
+  }
+
+  return resolved
+}
+
+async function resolveArticlePayload(article) {
+  const resolved = {
+    ...article,
+    blocks: await resolveMediaInBlocks(article.blocks ?? []),
+  }
+
+  if (typeof resolved.cover === 'string') {
+    resolved.cover = await getOrUploadFile(resolved.cover)
+  }
+
+  return resolved
+}
+
+async function resolveAboutPayload(payload) {
+  return {
+    ...payload,
+    blocks: await resolveMediaInBlocks(payload.blocks ?? []),
+  }
+}
+
+async function upsertSingleType(uid, data) {
+  const existing = await strapi.documents(uid).findFirst()
+
+  if (existing?.documentId) {
+    await strapi.documents(uid).update({
+      documentId: existing.documentId,
+      data,
+    })
+    return
+  }
+
+  await strapi.documents(uid).create({ data })
+}
+
+async function upsertArticle(article) {
+  const existing = await strapi.documents('api::article.article').findFirst({
+    filters: {
+      slug: {
+        $eq: article.slug,
+      },
+    },
+  })
+
+  const data = {
+    ...article,
+    publishedAt: new Date().toISOString(),
+  }
+
+  if (existing?.documentId) {
+    await strapi.documents('api::article.article').update({
+      documentId: existing.documentId,
+      data,
+    })
+    return
+  }
+
+  await strapi.documents('api::article.article').create({ data })
+}
+
+async function setPublicPermissions(permissionsByController) {
+  const publicRole = await strapi
+    .query('plugin::users-permissions.role')
+    .findOne({
+      where: { type: 'public' },
+    })
+
+  if (!publicRole?.id) {
+    return
+  }
+
+  for (const [controller, actions] of Object.entries(permissionsByController)) {
+    for (const action of actions) {
+      const permissionAction = `api::${controller}.${controller}.${action}`
+
+      const existing = await strapi
+        .query('plugin::users-permissions.permission')
+        .findOne({
+          where: {
+            action: permissionAction,
+            role: publicRole.id,
+          },
+        })
+
+      if (existing) {
+        continue
+      }
+
+      await strapi.query('plugin::users-permissions.permission').create({
+        data: {
+          action: permissionAction,
+          role: publicRole.id,
+        },
+      })
     }
   }
-
-  return updatedBlocks;
 }
 
-async function importArticles() {
-  for (const article of articles) {
-    const cover = await checkFileExistsBeforeUpload([`${article.slug}.jpg`]);
-    const updatedBlocks = await updateBlocks(article.blocks);
+async function runSeed() {
+  const resolvedGlobal = await resolveGlobalPayloadMedia(seedData.global)
+  const resolvedAbout = await resolveAboutPayload(seedData.about)
 
-    await createEntry({
-      model: 'article',
-      entry: {
-        ...article,
-        cover,
-        blocks: updatedBlocks,
-        // Make sure it's not a draft
-        publishedAt: Date.now(),
-      },
-    });
+  await upsertSingleType('api::global.global', resolvedGlobal)
+  await upsertSingleType('api::about.about', resolvedAbout)
+
+  for (const article of seedData.articles ?? []) {
+    const resolvedArticle = await resolveArticlePayload(article)
+    await upsertArticle(resolvedArticle)
   }
-}
 
-async function importGlobal() {
-  const favicon = await checkFileExistsBeforeUpload(['favicon.png']);
-  const shareImage = await checkFileExistsBeforeUpload(['default-image.png']);
-  return createEntry({
-    model: 'global',
-    entry: {
-      ...global,
-      favicon,
-      // Make sure it's not a draft
-      publishedAt: Date.now(),
-      defaultSeo: {
-        ...global.defaultSeo,
-        shareImage,
-      },
-    },
-  });
-}
-
-async function importAbout() {
-  const updatedBlocks = await updateBlocks(about.blocks);
-
-  await createEntry({
-    model: 'about',
-    entry: {
-      ...about,
-      blocks: updatedBlocks,
-      // Make sure it's not a draft
-      publishedAt: Date.now(),
-    },
-  });
-}
-
-async function importCategories() {
-  for (const category of categories) {
-    await createEntry({ model: 'category', entry: category });
-  }
-}
-
-async function importAuthors() {
-  for (const author of authors) {
-    const avatar = await checkFileExistsBeforeUpload([author.avatar]);
-
-    await createEntry({
-      model: 'author',
-      entry: {
-        ...author,
-        avatar,
-      },
-    });
-  }
-}
-
-async function importSeedData() {
-  // Allow read of application content types
-  await setPublicPermissions({
-    article: ['find', 'findOne'],
-    category: ['find', 'findOne'],
-    author: ['find', 'findOne'],
-    global: ['find', 'findOne'],
-    about: ['find', 'findOne'],
-  });
-
-  // Create all entries
-  await importCategories();
-  await importAuthors();
-  await importArticles();
-  await importGlobal();
-  await importAbout();
+  await setPublicPermissions(seedData.permissions ?? {})
 }
 
 async function main() {
-  const { createStrapi, compileStrapi } = require('@strapi/strapi');
+  const { createStrapi, compileStrapi } = require('@strapi/strapi')
 
-  const appContext = await compileStrapi();
-  const app = await createStrapi(appContext).load();
+  const appContext = await compileStrapi()
+  const app = await createStrapi(appContext).load()
 
-  app.log.level = 'error';
+  app.log.level = 'error'
 
-  await seedExampleApp();
-  await app.destroy();
+  try {
+    console.log('Running final seed...')
+    await runSeed()
+    console.log('Seed finished successfully.')
+  } finally {
+    await app.destroy()
+  }
 
-  process.exit(0);
+  process.exit(0)
 }
 
 main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+  console.error('Seed failed:', error)
+  process.exit(1)
+})

@@ -1,239 +1,112 @@
 {
+  "permissions": {
+    "about": ["find", "findOne"],
+    "article": ["find", "findOne"],
+    "global": ["find", "findOne"]
+  },
   "global": {
-    "siteName": "Strapi Blog",
+    "siteName": "unk",
+    "siteDescription": "Polymath designer, in a relationship with interactivity.",
+    "favicon": "favicon.png",
     "defaultSeo": {
-      "metaTitle": "Page",
-      "metaDescription": "A blog made with Strapi",
-      "shareImage": null
-    },
-    "siteDescription": "A Blog made with Strapi",
-    "favicon": null
+      "metaTitle": "unk — Portfolio",
+      "metaDescription": "Portfólio com projetos, processo e resultados de design.",
+      "shareImage": "default-image.png"
+    }
   },
   "about": {
-    "title": "About the strapi blog",
+    "title": "A Swiss Knive designer made in Brazil.",
     "blocks": [
       {
+        "__component": "shared.rich-text",
+        "body": "start each project, large or small by understanding and framing the problem we're facing. Once the problem is well defined, I collaborate with the team to set clear, measurable goals that align with both project requirements and the broader company vision.\\n\\nNext, I conduct different types of research, based on the nature of the problem and the goals that we're trying to achieve. Finally, I craft a focused design strategy and develop a roadmap to guide the team toward successful execution."
+      },
+      {
         "__component": "shared.quote",
-        "title": "Thelonius Monk",
-        "body": "You've got to dig it to dig it, you dig?"
+        "title": "Client list",
+        "body": "Jack Daniel’s, Itaú, NotCo, Wix, Asus, Volkswagen, Audi, Porsche, Ducati, Yamaha Motors, Hyundai, Skol, Vans, Traton, VW Truck & Buses, Assurant, Spotify"
       },
       {
         "__component": "shared.rich-text",
-        "body": "## Dedit imago conspicuus cum capillis totidem inhibere\n\nLorem markdownum **rerum**, est limine: columbas: ab infelix hostem arbore nudis\ncrudelis. Videtur reliquit ambo ferrum dote sub amne fatis **illuc**, in magis,\nnec."
+        "body": "Skills: Visual Design, 3D, Branding, Facilitation, Motion Graphics, Photography, Type Design, Art Direction, UI Animation."
       },
       {
         "__component": "shared.media",
-        "file": "coffee-art.jpg"
+        "file": "header-1.png"
       }
     ]
   },
-  "categories": [
-    {
-      "name": "news",
-      "slug": "news"
-    },
-    {
-      "name": "tech",
-      "slug": "tech"
-    },
-    {
-      "name": "food",
-      "slug": "food"
-    },
-    {
-      "name": "nature",
-      "slug": "nature"
-    },
-    {
-      "name": "story",
-      "slug": "story"
-    }
-  ],
-  "authors": [
-    {
-      "name": "David Doe",
-      "email": "daviddoe@strapi.io",
-      "avatar": "daviddoe@strapi.io.jpg"
-    },
-    {
-      "name": "Sarah Baker",
-      "email": "sarahbaker@strapi.io",
-      "avatar": "sarahbaker@strapi.io.jpg"
-    }
-  ],
   "articles": [
     {
-      "title": "The internet's Own boy",
-      "slug": "the-internet-s-own-boy",
-      "category": {
-        "id": 5
-      },
-      "author": {
-        "id": 1
-      },
-      "description": "Follow the story of Aaron Swartz, the boy who could change the world",
-      "cover": null,
+      "slug": "lovesicky-2025",
+      "title": "Lovesicky",
+      "description": "Art direction, 3D e branding para campanha 2025.",
+      "cover": "project-1.png",
       "blocks": [
         {
           "__component": "shared.rich-text",
-          "body": "## Probant \n\nse Lorem markdownum negat. Argo *saxa* videnda cornuaque hunc qui tanta spes teneas! Obliquis est dicenti est salutat ille tamen iuvenum nostrae dolore. - Colores nocituraque comitata eripiunt - Addit quodcunque solum cui et dextram illis - Nulli meus nec extemplo ille ferebat pressit Se blandita fulvae vox gravem Pittheus cesserunt sanguine herbis tu comitum tenuit. Sui in ruunt; Doridaque maculosae fuissem! Et loqui. \n\n## Abit sua\n\nse Lorem markdownum negat. Argo *saxa* videnda cornuaque hunc qui tanta spes teneas! Obliquis est dicenti est salutat ille tamen iuvenum nostrae dolore. - Colores nocituraque comitata eripiunt - Addit quodcunque solum cui et dextram illis - Nulli meus nec extemplo ille ferebat pressit Se blandita fulvae vox gravem Pittheus cesserunt sanguine herbis tu comitum tenuit. Sui in ruunt; Doridaque maculosae fuissem! Et loqui. "
-        },
-        {
-          "__component": "shared.quote",
-          "title": "Thelonius Monk",
-          "body": "You've got to dig it to dig it, you dig?"
+          "body": "Projeto Lovesicky com foco em art direction, 3D e branding.\\n\\nTags: art direction, 3D, branding.\\nAno: 2025."
         },
         {
           "__component": "shared.media",
-          "file": "coffee-art.jpg"
-        },
-        {
-          "__component": "shared.rich-text",
-          "body": "## Spatiantia astra \n\nFoeda, medio silva *errandum*: onus formam munere. Mutata bibulis est auxiliare arces etiamnunc verbis virgineo Priamidas illa Thescelus, nam fit locis lucis auras. Exitus hospes gratulor ut pondere [speslimite](http://www.curas.io/figuram); quid habent, Avernales faciente de. Pervenit Ino sonabile supplex cognoscenti vires, Bacchumque errat miserarum venandi dignabere dedisti. Discrimina iuncosaque virgaque tot sine superest [fissus](http://quos.org/sitet.aspx). Non color esset potest non sumit, sed vix arserat. Nisi immo silva tantum pectusque quos pennis quisquam artus!"
-        },
-        {
-          "__component": "shared.slider",
-          "files": ["coffee-art.jpg", "coffee-beans.jpg"]
+          "file": "project-1.png"
         }
       ]
     },
     {
-      "title": "This shrimp is awesome",
-      "slug": "this-shrimp-is-awesome",
-      "category": {
-        "id": 4
-      },
-      "author": {
-        "id": 1
-      },
-      "description": "Mantis shrimps, or stomatopods, are marine crustaceans of the order Stomatopoda.",
-      "cover": null,
+      "slug": "lovesicky-2025-variant-a",
+      "title": "Lovesicky Variant A",
+      "description": "Variação visual com mesmo sistema de direção criativa.",
+      "cover": "project-2.png",
       "blocks": [
         {
           "__component": "shared.rich-text",
-          "body": "## Probant \n\nse Lorem markdownum negat. Argo *saxa* videnda cornuaque hunc qui tanta spes teneas! Obliquis est dicenti est salutat ille tamen iuvenum nostrae dolore. - Colores nocituraque comitata eripiunt - Addit quodcunque solum cui et dextram illis - Nulli meus nec extemplo ille ferebat pressit Se blandita fulvae vox gravem Pittheus cesserunt sanguine herbis tu comitum tenuit. Sui in ruunt; Doridaque maculosae fuissem! Et loqui. \n\n## Abit sua\n\nse Lorem markdownum negat. Argo *saxa* videnda cornuaque hunc qui tanta spes teneas! Obliquis est dicenti est salutat ille tamen iuvenum nostrae dolore. - Colores nocituraque comitata eripiunt - Addit quodcunque solum cui et dextram illis - Nulli meus nec extemplo ille ferebat pressit Se blandita fulvae vox gravem Pittheus cesserunt sanguine herbis tu comitum tenuit. Sui in ruunt; Doridaque maculosae fuissem! Et loqui. "
-        },
-        {
-          "__component": "shared.quote",
-          "title": "Thelonius Monk",
-          "body": "You've got to dig it to dig it, you dig?"
+          "body": "Variação visual do projeto Lovesicky com ajustes de composição e ritmo.\\n\\nTags: art direction, 3D, branding.\\nAno: 2025."
         },
         {
           "__component": "shared.media",
-          "file": "coffee-art.jpg"
-        },
-        {
-          "__component": "shared.rich-text",
-          "body": "## Spatiantia astra \n\nFoeda, medio silva *errandum*: onus formam munere. Mutata bibulis est auxiliare arces etiamnunc verbis virgineo Priamidas illa Thescelus, nam fit locis lucis auras. Exitus hospes gratulor ut pondere [speslimite](http://www.curas.io/figuram); quid habent, Avernales faciente de. Pervenit Ino sonabile supplex cognoscenti vires, Bacchumque errat miserarum venandi dignabere dedisti. Discrimina iuncosaque virgaque tot sine superest [fissus](http://quos.org/sitet.aspx). Non color esset potest non sumit, sed vix arserat. Nisi immo silva tantum pectusque quos pennis quisquam artus!"
-        },
-        {
-          "__component": "shared.slider",
-          "files": ["coffee-art.jpg", "coffee-beans.jpg"]
+          "file": "project-2.png"
         }
       ]
     },
     {
-      "title": "A bug is becoming a meme on the internet",
-      "slug": "a-bug-is-becoming-a-meme-on-the-internet",
-      "category": {
-        "id": 2
-      },
-      "author": {
-        "id": 2
-      },
-      "description": "How a bug on MySQL is becoming a meme on the internet",
-      "cover": null,
+      "slug": "lovesicky-2025-variant-b",
+      "title": "Lovesicky Variant B",
+      "description": "Segunda variação do case para testes de linguagem visual.",
+      "cover": "project-1.png",
       "blocks": [
         {
           "__component": "shared.rich-text",
-          "body": "## Probant \n\nse Lorem markdownum negat. Argo *saxa* videnda cornuaque hunc qui tanta spes teneas! Obliquis est dicenti est salutat ille tamen iuvenum nostrae dolore. - Colores nocituraque comitata eripiunt - Addit quodcunque solum cui et dextram illis - Nulli meus nec extemplo ille ferebat pressit Se blandita fulvae vox gravem Pittheus cesserunt sanguine herbis tu comitum tenuit. Sui in ruunt; Doridaque maculosae fuissem! Et loqui. \n\n## Abit sua\n\nse Lorem markdownum negat. Argo *saxa* videnda cornuaque hunc qui tanta spes teneas! Obliquis est dicenti est salutat ille tamen iuvenum nostrae dolore. - Colores nocituraque comitata eripiunt - Addit quodcunque solum cui et dextram illis - Nulli meus nec extemplo ille ferebat pressit Se blandita fulvae vox gravem Pittheus cesserunt sanguine herbis tu comitum tenuit. Sui in ruunt; Doridaque maculosae fuissem! Et loqui. "
-        },
-        {
-          "__component": "shared.quote",
-          "title": "Thelonius Monk",
-          "body": "You've got to dig it to dig it, you dig?"
+          "body": "Segunda variação do case Lovesicky para exploração de linguagem visual.\\n\\nTags: art direction, 3D, branding.\\nAno: 2025."
         },
         {
           "__component": "shared.media",
-          "file": "coffee-art.jpg"
-        },
-        {
-          "__component": "shared.rich-text",
-          "body": "## Spatiantia astra \n\nFoeda, medio silva *errandum*: onus formam munere. Mutata bibulis est auxiliare arces etiamnunc verbis virgineo Priamidas illa Thescelus, nam fit locis lucis auras. Exitus hospes gratulor ut pondere [speslimite](http://www.curas.io/figuram); quid habent, Avernales faciente de. Pervenit Ino sonabile supplex cognoscenti vires, Bacchumque errat miserarum venandi dignabere dedisti. Discrimina iuncosaque virgaque tot sine superest [fissus](http://quos.org/sitet.aspx). Non color esset potest non sumit, sed vix arserat. Nisi immo silva tantum pectusque quos pennis quisquam artus!"
-        },
-        {
-          "__component": "shared.slider",
-          "files": ["coffee-art.jpg", "coffee-beans.jpg"]
+          "file": "project-1.png"
         }
       ]
     },
     {
-      "title": "Beautiful picture",
-      "slug": "beautiful-picture",
-      "category": {
-        "id": 4
-      },
-      "author": {
-        "id": 2
-      },
-      "description": "Description of a beautiful picture",
-      "cover": null,
+      "slug": "scope-and-structure",
+      "title": "Scope and structure",
+      "description": "Estrutura de escopo e direção para execução do projeto.",
+      "cover": "project-2.png",
       "blocks": [
         {
           "__component": "shared.rich-text",
-          "body": "## Probant \n\nse Lorem markdownum negat. Argo *saxa* videnda cornuaque hunc qui tanta spes teneas! Obliquis est dicenti est salutat ille tamen iuvenum nostrae dolore. - Colores nocituraque comitata eripiunt - Addit quodcunque solum cui et dextram illis - Nulli meus nec extemplo ille ferebat pressit Se blandita fulvae vox gravem Pittheus cesserunt sanguine herbis tu comitum tenuit. Sui in ruunt; Doridaque maculosae fuissem! Et loqui. \n\n## Abit sua\n\nse Lorem markdownum negat. Argo *saxa* videnda cornuaque hunc qui tanta spes teneas! Obliquis est dicenti est salutat ille tamen iuvenum nostrae dolore. - Colores nocituraque comitata eripiunt - Addit quodcunque solum cui et dextram illis - Nulli meus nec extemplo ille ferebat pressit Se blandita fulvae vox gravem Pittheus cesserunt sanguine herbis tu comitum tenuit. Sui in ruunt; Doridaque maculosae fuissem! Et loqui. "
+          "body": "Scope and structure com diretrizes de execução e contexto do projeto."
         },
         {
           "__component": "shared.quote",
-          "title": "Thelonius Monk",
-          "body": "You've got to dig it to dig it, you dig?"
-        },
-        {
-          "__component": "shared.media",
-          "file": "coffee-art.jpg"
+          "title": "Work",
+          "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse velit ante."
         },
         {
           "__component": "shared.rich-text",
-          "body": "## Spatiantia astra \n\nFoeda, medio silva *errandum*: onus formam munere. Mutata bibulis est auxiliare arces etiamnunc verbis virgineo Priamidas illa Thescelus, nam fit locis lucis auras. Exitus hospes gratulor ut pondere [speslimite](http://www.curas.io/figuram); quid habent, Avernales faciente de. Pervenit Ino sonabile supplex cognoscenti vires, Bacchumque errat miserarum venandi dignabere dedisti. Discrimina iuncosaque virgaque tot sine superest [fissus](http://quos.org/sitet.aspx). Non color esset potest non sumit, sed vix arserat. Nisi immo silva tantum pectusque quos pennis quisquam artus!"
+          "body": "Blocos de texto do case mantidos inicialmente como conteúdo de transição para migração de mocks."
         },
         {
           "__component": "shared.slider",
-          "files": ["coffee-art.jpg", "coffee-beans.jpg"]
-        }
-      ]
-    },
-    {
-      "title": "What's inside a Black Hole",
-      "slug": "what-s-inside-a-black-hole",
-      "category": {
-        "id": 1
-      },
-      "author": {
-        "id": 2
-      },
-      "description": "Maybe the answer is in this article, or not...",
-      "cover": null,
-      "blocks": [
-        {
-          "__component": "shared.rich-text",
-          "body": "## Probant \n\nse Lorem markdownum negat. Argo *saxa* videnda cornuaque hunc qui tanta spes teneas! Obliquis est dicenti est salutat ille tamen iuvenum nostrae dolore. - Colores nocituraque comitata eripiunt - Addit quodcunque solum cui et dextram illis - Nulli meus nec extemplo ille ferebat pressit Se blandita fulvae vox gravem Pittheus cesserunt sanguine herbis tu comitum tenuit. Sui in ruunt; Doridaque maculosae fuissem! Et loqui. \n\n## Abit sua\n\nse Lorem markdownum negat. Argo *saxa* videnda cornuaque hunc qui tanta spes teneas! Obliquis est dicenti est salutat ille tamen iuvenum nostrae dolore. - Colores nocituraque comitata eripiunt - Addit quodcunque solum cui et dextram illis - Nulli meus nec extemplo ille ferebat pressit Se blandita fulvae vox gravem Pittheus cesserunt sanguine herbis tu comitum tenuit. Sui in ruunt; Doridaque maculosae fuissem! Et loqui. "
-        },
-        {
-          "__component": "shared.quote",
-          "title": "Thelonius Monk",
-          "body": "You've got to dig it to dig it, you dig?"
-        },
-        {
-          "__component": "shared.media",
-          "file": "coffee-art.jpg"
-        },
-        {
-          "__component": "shared.rich-text",
-          "body": "## Spatiantia astra \n\nFoeda, medio silva *errandum*: onus formam munere. Mutata bibulis est auxiliare arces etiamnunc verbis virgineo Priamidas illa Thescelus, nam fit locis lucis auras. Exitus hospes gratulor ut pondere [speslimite](http://www.curas.io/figuram); quid habent, Avernales faciente de. Pervenit Ino sonabile supplex cognoscenti vires, Bacchumque errat miserarum venandi dignabere dedisti. Discrimina iuncosaque virgaque tot sine superest [fissus](http://quos.org/sitet.aspx). Non color esset potest non sumit, sed vix arserat. Nisi immo silva tantum pectusque quos pennis quisquam artus!"
-        },
-        {
-          "__component": "shared.slider",
-          "files": ["coffee-art.jpg", "coffee-beans.jpg"]
+          "files": ["project-1.png", "project-2.png"]
         }
       ]
     }
