@@ -1,19 +1,48 @@
 FROM node:22-alpine
-# Installing libvips-dev for sharp Compatibility
-RUN apk update && apk add --no-cache build-base gcc autoconf automake zlib-dev libpng-dev nasm bash vips-dev git
-ARG NODE_ENV=development
-ENV NODE_ENV=${NODE_ENV}
 
-WORKDIR /opt/
-COPY package.json ./
-RUN yarn global add node-gyp
-RUN yarn config set network-timeout 600000 -g && yarn install
-ENV PATH=/opt/node_modules/.bin:$PATH
+# Dependências necessárias para o Strapi (sharp/libvips)
+RUN apk add --no-cache \
+  build-base \
+  gcc \
+  autoconf \
+  automake \
+  zlib-dev \
+  libpng-dev \
+  nasm \
+  bash \
+  vips-dev \
+  git
 
-WORKDIR /opt/app
-COPY . .
-RUN chown -R node:node /opt/app
-USER node
-RUN ["yarn", "build"]
+ENV NODE_ENV=development
+
+# ==============================
+# 1️⃣ Instala dependências do monorepo
+# ==============================
+
+WORKDIR /opt
+
+# Copia root (workspaces + lockfile)
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn ./.yarn
+
+# Copia apenas o package.json do CMS (melhor cache)
+COPY clients/cms/package.json ./clients/cms/
+
+# Instala dependências respeitando workspaces
+RUN corepack enable
+RUN yarn install
+
+# ==============================
+# 2️⃣ Copia código da aplicação
+# ==============================
+
+COPY clients/cms ./clients/cms
+
+WORKDIR /opt/clients/cms
+
+# Build do Strapi
+RUN yarn build
+
 EXPOSE 1337
+
 CMD ["yarn", "develop"]
