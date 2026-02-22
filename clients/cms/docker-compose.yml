@@ -2,7 +2,9 @@ version: "3"
 services:
   strapi:
     container_name: strapi
-    build: .
+    build:
+      context: ../../
+      dockerfile: clients/cms/Dockerfile
     image: strapi:latest
     restart: unless-stopped
     env_file: .env
@@ -20,8 +22,6 @@ services:
     volumes:
       - ./config:/opt/app/config
       - ./src:/opt/app/src
-      - ./package.json:/opt/package.json
-      - ./yarn.lock:/opt/yarn.lock
       - ./.env:/opt/app/.env
       - ./public/uploads:/opt/app/public/uploads
     ports:
