@@ -433,7 +433,7 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
 export interface ApiAboutAbout extends Struct.SingleTypeSchema {
   collectionName: 'abouts'
   info: {
-    description: 'Write about yourself and the content you create'
+    description: 'About page with structured content'
     displayName: 'About'
     pluralName: 'abouts'
     singularName: 'about'
@@ -442,121 +442,52 @@ export interface ApiAboutAbout extends Struct.SingleTypeSchema {
     draftAndPublish: false
   }
   attributes: {
-    blocks: Schema.Attribute.DynamicZone<
-      ['shared.media', 'shared.quote', 'shared.rich-text', 'shared.slider']
-    >
+    body: Schema.Attribute.Text & Schema.Attribute.Required
+    clients: Schema.Attribute.Component<'portfolio.client-item', true> &
+      Schema.Attribute.Required
     createdAt: Schema.Attribute.DateTime
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private
+    email: Schema.Attribute.Email & Schema.Attribute.Required
+    image: Schema.Attribute.Component<'shared.responsive-image', false> &
+      Schema.Attribute.Required
     locale: Schema.Attribute.String & Schema.Attribute.Private
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::about.about'> &
       Schema.Attribute.Private
     publishedAt: Schema.Attribute.DateTime
-    title: Schema.Attribute.String
+    skills: Schema.Attribute.Component<'portfolio.skill-item', true> &
+      Schema.Attribute.Required
+    title: Schema.Attribute.String & Schema.Attribute.Required
     updatedAt: Schema.Attribute.DateTime
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private
   }
 }
 
-export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
-  collectionName: 'articles'
+export interface ApiBadgeBadge extends Struct.CollectionTypeSchema {
+  collectionName: 'badges'
   info: {
-    description: 'Create your blog content'
-    displayName: 'Article'
-    pluralName: 'articles'
-    singularName: 'article'
-  }
-  options: {
-    draftAndPublish: true
-  }
-  attributes: {
-    author: Schema.Attribute.Relation<'manyToOne', 'api::author.author'>
-    blocks: Schema.Attribute.DynamicZone<
-      ['shared.media', 'shared.quote', 'shared.rich-text', 'shared.slider']
-    >
-    category: Schema.Attribute.Relation<'manyToOne', 'api::category.category'>
-    cover: Schema.Attribute.Media<'images' | 'files' | 'videos'>
-    createdAt: Schema.Attribute.DateTime
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private
-    description: Schema.Attribute.Text &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 80
-      }>
-    locale: Schema.Attribute.String & Schema.Attribute.Private
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::article.article'
-    > &
-      Schema.Attribute.Private
-    publishedAt: Schema.Attribute.DateTime
-    slug: Schema.Attribute.UID<'title'>
-    title: Schema.Attribute.String
-    updatedAt: Schema.Attribute.DateTime
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private
-  }
-}
-
-export interface ApiAuthorAuthor extends Struct.CollectionTypeSchema {
-  collectionName: 'authors'
-  info: {
-    description: 'Create authors for your content'
-    displayName: 'Author'
-    pluralName: 'authors'
-    singularName: 'author'
+    description: 'Project tags/badges'
+    displayName: 'Badge'
+    pluralName: 'badges'
+    singularName: 'badge'
   }
   options: {
     draftAndPublish: false
   }
   attributes: {
-    articles: Schema.Attribute.Relation<'oneToMany', 'api::article.article'>
-    avatar: Schema.Attribute.Media<'images' | 'files' | 'videos'>
     createdAt: Schema.Attribute.DateTime
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private
-    email: Schema.Attribute.String
     locale: Schema.Attribute.String & Schema.Attribute.Private
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::author.author'
-    > &
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::badge.badge'> &
       Schema.Attribute.Private
-    name: Schema.Attribute.String
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique
+    projects: Schema.Attribute.Relation<'manyToMany', 'api::project.project'>
     publishedAt: Schema.Attribute.DateTime
-    updatedAt: Schema.Attribute.DateTime
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private
-  }
-}
-
-export interface ApiCategoryCategory extends Struct.CollectionTypeSchema {
-  collectionName: 'categories'
-  info: {
-    description: 'Organize your content into categories'
-    displayName: 'Category'
-    pluralName: 'categories'
-    singularName: 'category'
-  }
-  options: {
-    draftAndPublish: false
-  }
-  attributes: {
-    articles: Schema.Attribute.Relation<'oneToMany', 'api::article.article'>
-    createdAt: Schema.Attribute.DateTime
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private
-    description: Schema.Attribute.Text
-    locale: Schema.Attribute.String & Schema.Attribute.Private
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::category.category'
-    > &
-      Schema.Attribute.Private
-    name: Schema.Attribute.String
-    publishedAt: Schema.Attribute.DateTime
-    slug: Schema.Attribute.UID
+    slug: Schema.Attribute.UID<'name'>
     updatedAt: Schema.Attribute.DateTime
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private
@@ -592,6 +523,52 @@ export interface ApiGlobalGlobal extends Struct.SingleTypeSchema {
     updatedAt: Schema.Attribute.DateTime
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private
+  }
+}
+
+export interface ApiProjectProject extends Struct.CollectionTypeSchema {
+  collectionName: 'projects'
+  info: {
+    description: 'Portfolio project with blocks and media'
+    displayName: 'Project'
+    pluralName: 'projects'
+    singularName: 'project'
+  }
+  options: {
+    draftAndPublish: true
+  }
+  attributes: {
+    badges: Schema.Attribute.Relation<'manyToMany', 'api::badge.badge'>
+    blocks: Schema.Attribute.DynamicZone<
+      [
+        'portfolio.scope-block',
+        'portfolio.quote-title-block',
+        'portfolio.paragraph-block',
+        'portfolio.images-block',
+        'portfolio.results-block',
+      ]
+    > &
+      Schema.Attribute.Required
+    blur_color: Schema.Attribute.String
+    cover_images: Schema.Attribute.Component<'shared.responsive-image', false> &
+      Schema.Attribute.Required
+    createdAt: Schema.Attribute.DateTime
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private
+    description: Schema.Attribute.Text & Schema.Attribute.Required
+    locale: Schema.Attribute.String & Schema.Attribute.Private
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::project.project'
+    > &
+      Schema.Attribute.Private
+    publishedAt: Schema.Attribute.DateTime
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required
+    title: Schema.Attribute.String & Schema.Attribute.Required
+    updatedAt: Schema.Attribute.DateTime
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private
+    year: Schema.Attribute.String & Schema.Attribute.Required
   }
 }
 
@@ -1107,10 +1084,9 @@ declare module '@strapi/strapi' {
       'admin::transfer-token-permission': AdminTransferTokenPermission
       'admin::user': AdminUser
       'api::about.about': ApiAboutAbout
-      'api::article.article': ApiArticleArticle
-      'api::author.author': ApiAuthorAuthor
-      'api::category.category': ApiCategoryCategory
+      'api::badge.badge': ApiBadgeBadge
       'api::global.global': ApiGlobalGlobal
+      'api::project.project': ApiProjectProject
       'plugin::content-releases.release': PluginContentReleasesRelease
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction
       'plugin::i18n.locale': PluginI18NLocale

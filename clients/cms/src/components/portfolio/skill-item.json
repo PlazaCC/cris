@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_portfolio_skill_items",
+  "info": {
+    "displayName": "Skill Item",
+    "description": "Individual skill"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

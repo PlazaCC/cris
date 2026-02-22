@@ -1,37 +1,122 @@
 import type { Schema, Struct } from '@strapi/strapi'
 
-export interface SharedMedia extends Struct.ComponentSchema {
-  collectionName: 'components_shared_media'
+export interface PortfolioClientItem extends Struct.ComponentSchema {
+  collectionName: 'components_portfolio_client_items'
   info: {
-    displayName: 'Media'
-    icon: 'file-video'
+    description: 'Individual client name'
+    displayName: 'Client Item'
   }
   attributes: {
-    file: Schema.Attribute.Media<'images' | 'files' | 'videos'>
+    name: Schema.Attribute.String & Schema.Attribute.Required
   }
 }
 
-export interface SharedQuote extends Struct.ComponentSchema {
-  collectionName: 'components_shared_quotes'
+export interface PortfolioImagesBlock extends Struct.ComponentSchema {
+  collectionName: 'components_portfolio_images_blocks'
   info: {
-    displayName: 'Quote'
-    icon: 'indent'
+    description: 'Block with responsive image gallery'
+    displayName: 'Images Block'
   }
   attributes: {
-    body: Schema.Attribute.Text
-    title: Schema.Attribute.String
+    images: Schema.Attribute.Component<'shared.responsive-image', true> &
+      Schema.Attribute.Required
   }
 }
 
-export interface SharedRichText extends Struct.ComponentSchema {
-  collectionName: 'components_shared_rich_texts'
+export interface PortfolioParagraphBlock extends Struct.ComponentSchema {
+  collectionName: 'components_portfolio_paragraph_blocks'
   info: {
-    description: ''
-    displayName: 'Rich text'
-    icon: 'align-justify'
+    description: 'Block with array of text paragraphs'
+    displayName: 'Paragraph Block'
   }
   attributes: {
-    body: Schema.Attribute.RichText
+    items: Schema.Attribute.Component<'portfolio.paragraph-item', true> &
+      Schema.Attribute.Required
+  }
+}
+
+export interface PortfolioParagraphItem extends Struct.ComponentSchema {
+  collectionName: 'components_portfolio_paragraph_items'
+  info: {
+    description: 'Individual paragraph with HTML support'
+    displayName: 'Paragraph Item'
+  }
+  attributes: {
+    content: Schema.Attribute.Text & Schema.Attribute.Required
+  }
+}
+
+export interface PortfolioQuoteTitleBlock extends Struct.ComponentSchema {
+  collectionName: 'components_portfolio_quote_title_blocks'
+  info: {
+    description: 'Large heading quote block'
+    displayName: 'Quote Title Block'
+  }
+  attributes: {
+    text: Schema.Attribute.String & Schema.Attribute.Required
+  }
+}
+
+export interface PortfolioResultItem extends Struct.ComponentSchema {
+  collectionName: 'components_portfolio_result_items'
+  info: {
+    description: 'Individual result metric with value and label'
+    displayName: 'Result Item'
+  }
+  attributes: {
+    label: Schema.Attribute.String & Schema.Attribute.Required
+    positive: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<true>
+    value: Schema.Attribute.String & Schema.Attribute.Required
+  }
+}
+
+export interface PortfolioResultsBlock extends Struct.ComponentSchema {
+  collectionName: 'components_portfolio_results_blocks'
+  info: {
+    description: 'Block with project results and metrics'
+    displayName: 'Results Block'
+  }
+  attributes: {
+    results: Schema.Attribute.Component<'portfolio.result-item', true> &
+      Schema.Attribute.Required
+  }
+}
+
+export interface PortfolioScopeBlock extends Struct.ComponentSchema {
+  collectionName: 'components_portfolio_scope_blocks'
+  info: {
+    description: 'Block with title and HTML paragraphs'
+    displayName: 'Scope Block'
+  }
+  attributes: {
+    paragraphs: Schema.Attribute.Component<'portfolio.paragraph-item', true> &
+      Schema.Attribute.Required
+    title: Schema.Attribute.String & Schema.Attribute.Required
+  }
+}
+
+export interface PortfolioSkillItem extends Struct.ComponentSchema {
+  collectionName: 'components_portfolio_skill_items'
+  info: {
+    description: 'Individual skill'
+    displayName: 'Skill Item'
+  }
+  attributes: {
+    name: Schema.Attribute.String & Schema.Attribute.Required
+  }
+}
+
+export interface SharedResponsiveImage extends Struct.ComponentSchema {
+  collectionName: 'components_shared_responsive_images'
+  info: {
+    description: 'Image with desktop and mobile variants'
+    displayName: 'Responsive Image'
+  }
+  attributes: {
+    desktop: Schema.Attribute.Media<'images'> & Schema.Attribute.Required
+    mobile: Schema.Attribute.Media<'images'> & Schema.Attribute.Required
   }
 }
 
@@ -50,26 +135,20 @@ export interface SharedSeo extends Struct.ComponentSchema {
   }
 }
 
-export interface SharedSlider extends Struct.ComponentSchema {
-  collectionName: 'components_shared_sliders'
-  info: {
-    description: ''
-    displayName: 'Slider'
-    icon: 'address-book'
-  }
-  attributes: {
-    files: Schema.Attribute.Media<'images', true>
-  }
-}
-
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
-      'shared.media': SharedMedia
-      'shared.quote': SharedQuote
-      'shared.rich-text': SharedRichText
+      'portfolio.client-item': PortfolioClientItem
+      'portfolio.images-block': PortfolioImagesBlock
+      'portfolio.paragraph-block': PortfolioParagraphBlock
+      'portfolio.paragraph-item': PortfolioParagraphItem
+      'portfolio.quote-title-block': PortfolioQuoteTitleBlock
+      'portfolio.result-item': PortfolioResultItem
+      'portfolio.results-block': PortfolioResultsBlock
+      'portfolio.scope-block': PortfolioScopeBlock
+      'portfolio.skill-item': PortfolioSkillItem
+      'shared.responsive-image': SharedResponsiveImage
       'shared.seo': SharedSeo
-      'shared.slider': SharedSlider
     }
   }
 }

@@ -5,7 +5,7 @@
     "singularName": "about",
     "pluralName": "abouts",
     "displayName": "About",
-    "description": "Write about yourself and the content you create"
+    "description": "About page with structured content"
   },
   "options": {
     "draftAndPublish": false
@@ -13,11 +13,34 @@
   "pluginOptions": {},
   "attributes": {
     "title": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
-    "blocks": {
-      "type": "dynamiczone",
-      "components": ["shared.media", "shared.quote", "shared.rich-text", "shared.slider"]
+    "body": {
+      "type": "text",
+      "required": true
+    },
+    "clients": {
+      "type": "component",
+      "repeatable": true,
+      "required": true,
+      "component": "portfolio.client-item"
+    },
+    "skills": {
+      "type": "component",
+      "repeatable": true,
+      "required": true,
+      "component": "portfolio.skill-item"
+    },
+    "image": {
+      "type": "component",
+      "repeatable": false,
+      "required": true,
+      "component": "shared.responsive-image"
+    },
+    "email": {
+      "type": "email",
+      "required": true
     }
   }
 }

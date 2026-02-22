@@ -77,35 +77,57 @@ async function getOrUploadFile(fileName) {
   return uploaded
 }
 
+async function resolveResponsiveImage(imageComponent) {
+  if (imageComponent.__component !== 'shared.responsive-image') {
+    return imageComponent
+  }
+
+  const resolved = { ...imageComponent }
+
+  if (typeof resolved.desktop === 'string') {
+    resolved.desktop = await getOrUploadFile(resolved.desktop)
+  }
+
+  if (typeof resolved.mobile === 'string') {
+    resolved.mobile = await getOrUploadFile(resolved.mobile)
+  }
+
+  return resolved
+}
+
 async function resolveMediaInBlocks(blocks) {
   const resolvedBlocks = []
 
   for (const block of blocks) {
+    // Resolve portfolio.images-block
     if (
-      block.__component === 'shared.media' &&
-      typeof block.file === 'string'
+      block.__component === 'portfolio.images-block' &&
+      Array.isArray(block.images)
+    ) {
+      const resolvedImages = []
+      for (const imageComponent of block.images) {
+        resolvedImages.push(await resolveResponsiveImage(imageComponent))
+      }
+      resolvedBlocks.push({
+        ...block,
+        images: resolvedImages,
+      })
+      continue
+    }
+
+    // Resolve portfolio.results-block
+    if (
+      block.__component === 'portfolio.results-block' &&
+      Array.isArray(block.results)
     ) {
       resolvedBlocks.push({
         ...block,
-        file: await getOrUploadFile(block.file),
+        results: block.results,
       })
       continue
     }
 
-    if (block.__component === 'shared.slider' && Array.isArray(block.files)) {
-      const files = []
-
-      for (const fileName of block.files) {
-        files.push(await getOrUploadFile(fileName))
-      }
-
-      resolvedBlocks.push({
-        ...block,
-        files,
-      })
-      continue
-    }
-
+    // Other blocks pass through (scope-block, quote-title-block, paragraph-block)
     resolvedBlocks.push(block)
   }
 
@@ -133,24 +155,41 @@ async function resolveGlobalPayloadMedia(payload) {
   return resolved
 }
 
-async function resolveArticlePayload(article) {
+async function resolveProjectPayload(project) {
   const resolved = {
-    ...article,
-    blocks: await resolveMediaInBlocks(article.blocks ?? []),
+    ...project,
+    blocks: await resolveMediaInBlocks(project.blocks ?? []),
   }
 
-  if (typeof resolved.cover === 'string') {
-    resolved.cover = await getOrUploadFile(resolved.cover)
+  if (resolved.cover_images?.__component === 'shared.responsive-image') {
+    resolved.cover_images = await resolveResponsiveImage(resolved.cover_images)
+  }
+
+  // Resolve badges by name to IDs
+  if (Array.isArray(resolved.badges)) {
+    const badgeIds = []
+    for (const badgeName of resolved.badges) {
+      const badge = await strapi.documents('api::badge.badge').findFirst({
+        filters: { name: { $eq: badgeName } },
+      })
+      if (badge?.documentId) {
+        badgeIds.push(badge.documentId)
+      }
+    }
+    resolved.badges = badgeIds
   }
 
   return resolved
 }
 
 async function resolveAboutPayload(payload) {
-  return {
-    ...payload,
-    blocks: await resolveMediaInBlocks(payload.blocks ?? []),
+  const resolved = { ...payload }
+
+  if (resolved.image?.__component === 'shared.responsive-image') {
+    resolved.image = await resolveResponsiveImage(resolved.image)
   }
+
+  return resolved
 }
 
 async function upsertSingleType(uid, data) {
@@ -167,29 +206,49 @@ async function upsertSingleType(uid, data) {
   await strapi.documents(uid).create({ data })
 }
 
-async function upsertArticle(article) {
-  const existing = await strapi.documents('api::article.article').findFirst({
+async function upsertProject(project) {
+  const existing = await strapi.documents('api::project.project').findFirst({
     filters: {
       slug: {
-        $eq: article.slug,
+        $eq: project.slug,
       },
     },
   })
 
   const data = {
-    ...article,
+    ...project,
     publishedAt: new Date().toISOString(),
   }
 
   if (existing?.documentId) {
-    await strapi.documents('api::article.article').update({
+    await strapi.documents('api::project.project').update({
       documentId: existing.documentId,
       data,
     })
     return
   }
 
-  await strapi.documents('api::article.article').create({ data })
+  await strapi.documents('api::project.project').create({ data })
+}
+
+async function upsertBadge(badge) {
+  const existing = await strapi.documents('api::badge.badge').findFirst({
+    filters: {
+      name: {
+        $eq: badge.name,
+      },
+    },
+  })
+
+  if (existing?.documentId) {
+    return existing
+  }
+
+  const created = await strapi.documents('api::badge.badge').create({
+    data: badge,
+  })
+
+  return created
 }
 
 async function setPublicPermissions(permissionsByController) {
@@ -237,9 +296,15 @@ async function runSeed() {
   await upsertSingleType('api::global.global', resolvedGlobal)
   await upsertSingleType('api::about.about', resolvedAbout)
 
-  for (const article of seedData.articles ?? []) {
-    const resolvedArticle = await resolveArticlePayload(article)
-    await upsertArticle(resolvedArticle)
+  // Create badges first
+  for (const badge of seedData.badges ?? []) {
+    await upsertBadge(badge)
+  }
+
+  // Then create projects with badge relations
+  for (const project of seedData.projects ?? []) {
+    const resolvedProject = await resolveProjectPayload(project)
+    await upsertProject(resolvedProject)
   }
 
   await setPublicPermissions(seedData.permissions ?? {})

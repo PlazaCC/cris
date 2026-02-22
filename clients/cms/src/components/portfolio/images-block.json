@@ -1,0 +1,16 @@
+{
+  "collectionName": "components_portfolio_images_blocks",
+  "info": {
+    "displayName": "Images Block",
+    "description": "Block with responsive image gallery"
+  },
+  "options": {},
+  "attributes": {
+    "images": {
+      "type": "component",
+      "repeatable": true,
+      "required": true,
+      "component": "shared.responsive-image"
+    }
+  }
+}

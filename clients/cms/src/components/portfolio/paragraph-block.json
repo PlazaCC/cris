@@ -1,0 +1,16 @@
+{
+  "collectionName": "components_portfolio_paragraph_blocks",
+  "info": {
+    "displayName": "Paragraph Block",
+    "description": "Block with array of text paragraphs"
+  },
+  "options": {},
+  "attributes": {
+    "items": {
+      "type": "component",
+      "repeatable": true,
+      "required": true,
+      "component": "portfolio.paragraph-item"
+    }
+  }
+}

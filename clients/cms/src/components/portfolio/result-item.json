@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_portfolio_result_items",
+  "info": {
+    "displayName": "Result Item",
+    "description": "Individual result metric with value and label"
+  },
+  "options": {},
+  "attributes": {
+    "value": {
+      "type": "string",
+      "required": true
+    },
+    "positive": {
+      "type": "boolean",
+      "required": true,
+      "default": true
+    },
+    "label": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

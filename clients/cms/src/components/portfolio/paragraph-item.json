@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_portfolio_paragraph_items",
+  "info": {
+    "displayName": "Paragraph Item",
+    "description": "Individual paragraph with HTML support"
+  },
+  "options": {},
+  "attributes": {
+    "content": {
+      "type": "text",
+      "required": true
+    }
+  }
+}

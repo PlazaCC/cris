@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_portfolio_quote_title_blocks",
+  "info": {
+    "displayName": "Quote Title Block",
+    "description": "Large heading quote block"
+  },
+  "options": {},
+  "attributes": {
+    "text": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

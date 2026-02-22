@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_portfolio_client_items",
+  "info": {
+    "displayName": "Client Item",
+    "description": "Individual client name"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

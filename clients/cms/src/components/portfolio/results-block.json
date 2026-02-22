@@ -1,0 +1,16 @@
+{
+  "collectionName": "components_portfolio_results_blocks",
+  "info": {
+    "displayName": "Results Block",
+    "description": "Block with project results and metrics"
+  },
+  "options": {},
+  "attributes": {
+    "results": {
+      "type": "component",
+      "repeatable": true,
+      "required": true,
+      "component": "portfolio.result-item"
+    }
+  }
+}
