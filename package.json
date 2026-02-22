@@ -7,6 +7,9 @@
       "shared/*"
     ]
   },
+  "scripts": {
+    "dev": "yarn workspaces foreach -A run dev"
+  },
   "devDependencies": {
     "@types/node": "^24.0.10",
     "prettier": "^3.6.2",
