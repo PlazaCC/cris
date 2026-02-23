@@ -2,11 +2,10 @@ services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
-    env_file: .env
     environment:
-      POSTGRES_USER: ${DATABASE_USERNAME}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME:-cris}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-cris}
+      POSTGRES_DB: ${DATABASE_NAME:-cris}
     volumes:
       - cms-db:/var/lib/postgresql/data
     ports:
