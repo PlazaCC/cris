@@ -8,10 +8,11 @@
     ]
   },
   "scripts": {
+    "clean": "node ./scripts/clean.mjs",
     "dev": "yarn workspaces foreach --all -i -p run dev",
     "dev:docker": "docker compose -f docker-compose.dev.yml up -d",
     "dev:docker:down": "docker compose -f docker-compose.dev.yml down",
-    "seed:cms": "yarn workspace client-cms seed"
+    "seed": "yarn workspace client-cms seed"
   },
   "devDependencies": {
     "@types/node": "^24.0.10",
