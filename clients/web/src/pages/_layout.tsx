@@ -60,7 +60,7 @@ export function AppLayout() {
   }, [global])
 
   return (
-    <div className={cn('relative w-full')}>
+    <div className={cn('relative w-full overflow-x-hidden', )}>
       <AnimatePresence mode="wait">
         <AnimatedOutlet key={nextMatch?.id ?? match.id} />
       </AnimatePresence>
@@ -127,7 +127,7 @@ const AnimatedOutlet = forwardRef<HTMLDivElement>((_, ref) => {
   }
 
   return (
-    <motion.div ref={ref} {...anim(opacity)}>
+    <motion.div ref={ref} {...anim(opacity)} className={cn(!isPresent && 'pointer-events-none overflow-hidden')}>
       <RouterContext.Provider value={renderedContext.current}>
         <Outlet />
       </RouterContext.Provider>
