@@ -6,8 +6,8 @@ COPY package.json yarn.lock .yarnrc.yml ./
 COPY .yarn ./.yarn
 COPY clients/web/package.json ./clients/web/
 
-RUN corepack enable \
-  && yarn install --immutable
+RUN corepack enable
+RUN yarn install
 
 COPY clients/web ./clients/web
 

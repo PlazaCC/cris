@@ -18,8 +18,8 @@ COPY package.json yarn.lock .yarnrc.yml ./
 COPY .yarn ./.yarn
 COPY clients/cms/package.json ./clients/cms/
 
-RUN corepack enable \
-  && yarn install --immutable
+RUN corepack enable
+RUN yarn install
 
 COPY clients/cms ./clients/cms
 

@@ -1,15 +1,20 @@
+import { createRoute } from '@tanstack/react-router'
+import { motion, useInView, useScroll, useTransform } from 'framer-motion'
+import { forwardRef, useEffect, useRef, useState } from 'react'
+
 import { ErrorState } from '@/components/feedback/error-state'
 import { LoadingState } from '@/components/feedback/loading-state'
 import { ResponsiveImageView } from '@/components/ui/responsive-image'
+
 import { useGlobal } from '@/features/global/hooks/use-global'
 import { useHero } from '@/features/hero/hooks/use-hero'
 import { useProjects } from '@/features/projects/hooks/use-projects'
+
 import type { Project, ResponsiveImage } from '@/interrfaces'
+
 import { cn } from '@/lib/utils'
+
 import { locomotiveScroll } from '@/main'
-import { createRoute } from '@tanstack/react-router'
-import { motion, useInView } from 'framer-motion'
-import { forwardRef, useRef, useState } from 'react'
 import { AppLayout } from '../_layout'
 
 HomePage.route = createRoute({
@@ -199,7 +204,7 @@ export const Projects = ({ projects }: { projects: Project[] }) => {
         ref={sectionRef}
         className="relative w-full max-w-[1920px] px-10"
       >
-        <ul className="flex flex-col gap-9">
+        <ul className="relative flex flex-col gap-9">
           {projects.map((project, index) => (
             <ProjectCard
               key={project.documentId || project.slug || index}
@@ -210,6 +215,7 @@ export const Projects = ({ projects }: { projects: Project[] }) => {
               badges={project.badges}
               image={project.coverImages}
               onInView={() => setActiveIndex(index)}
+              isLast={index === projects.length - 1}
             />
           ))}
         </ul>
@@ -231,42 +237,83 @@ type ProjectCardProps = {
   badges: string[]
   image: Project['coverImages']
   onInView: () => void
+  isLast?: boolean
 }
 
 const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
-  ({ image, title, badges, onInView }, ref) => {
-    return (
-      <motion.div
-        ref={ref}
-        className="relative mt-[35px] mb-[93px] h-[80vh] w-full overflow-hidden rounded-4xl"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: false, amount: 0.1 }}
-        onViewportEnter={() => {
-          onInView()
-        }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
-      >
-        <ResponsiveImageView
-          alt={title}
-          image={image}
-          imgClassName="h-full w-full object-cover"
-        />
+  ({ image, title, badges, onInView, isLast }, ref) => {
+    const sentinelRef = useRef<HTMLDivElement>(null)
+    const stickyStartY = useRef<number | null>(null)
+    const { scrollY } = useScroll()
 
-        <div className="absolute bottom-[30px] left-[35px] flex w-full max-w-[360px] flex-col gap-4 rounded-2xl bg-white px-8 py-4">
-          <h2 className="text-[32px]">{title}</h2>
-          <ul className="flex gap-2">
-            {badges.map((badge) => (
-              <li
-                className="bg-blue rounded-full px-4 py-1 text-xs text-white"
-                key={badge}
-              >
-                {badge}
-              </li>
-            ))}
-          </ul>
+    useEffect(() => {
+      const sentinel = sentinelRef.current
+      if (!sentinel) return
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting && entry.boundingClientRect.top < 0) {
+            // sentinel saiu pelo topo → card acabou de grudar
+            stickyStartY.current = scrollY.get()
+          } else if (entry.isIntersecting) {
+            // sentinel voltou → card não está mais sticky
+            stickyStartY.current = null
+          }
+        },
+        { threshold: 0 }
+      )
+
+      observer.observe(sentinel)
+      return () => observer.disconnect()
+    }, [scrollY])
+
+    const animationRange = window.innerHeight
+
+    const filter = useTransform(scrollY, (latest) => {
+      if (isLast || stickyStartY.current === null) return 'blur(0px)'
+      const t = Math.max(0, Math.min(1, (latest - stickyStartY.current) / animationRange))
+      const blurAmount = Math.max(0, (t - 0.3) / 0.7) * 10
+      return `blur(${blurAmount}px)`
+    })
+
+    const scale = useTransform(scrollY, (latest) => {
+      if (isLast || stickyStartY.current === null) return 1
+      const t = Math.max(0, Math.min(1, (latest - stickyStartY.current) / animationRange))
+      return 1 - Math.max(0, (t - 0.3) / 0.7) * 0.12
+    })
+
+    return (
+      <>
+        {/* sentinel: 1px antes do sticky — quando sai pelo topo, o card grudou */}
+        <div ref={sentinelRef} className="pointer-events-none h-px" aria-hidden />
+        <div className="sticky top-0 pt-[35px]">
+          <motion.div
+            ref={ref}
+            className="mb-[93px] h-[80vh] w-full overflow-hidden rounded-4xl"
+            style={{ filter, scale }}
+          >
+            <ResponsiveImageView
+              alt={title}
+              image={image}
+              imgClassName="h-full w-full object-cover"
+            />
+
+            <div className="absolute bottom-[30px] left-[35px] flex w-full max-w-[360px] flex-col gap-4 rounded-2xl bg-white px-8 py-4">
+              <h2 className="text-[32px]">{title}</h2>
+              <ul className="flex gap-2">
+                {badges.map((badge) => (
+                  <li
+                    className="bg-blue rounded-full px-4 py-1 text-xs text-white"
+                    key={badge}
+                  >
+                    {badge}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
         </div>
-      </motion.div>
+      </>
     )
   }
 )
