@@ -60,7 +60,7 @@ export function AppLayout() {
   }, [global])
 
   return (
-    <div className={cn('relative w-full overflow-x-hidden', )}>
+    <div className={cn('relative w-full overflow-x-clip', )}>
       <AnimatePresence mode="wait">
         <AnimatedOutlet key={nextMatch?.id ?? match.id} />
       </AnimatePresence>
