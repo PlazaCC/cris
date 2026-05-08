@@ -5,12 +5,14 @@ import { rootRoute } from './pages/root'
 
 import { AppLayout } from './pages/_layout'
 import { AboutPage } from './pages/about'
+import { AdminRedirectPage } from './pages/admin/login'
 import { HomePage } from './pages/home'
 import { WorkPage } from './pages/work'
 
 const queryClient = new QueryClient()
 
 const routeTree = rootRoute.addChildren([
+  AdminRedirectPage.route,
   AppLayout.route.addChildren([
     HomePage.route,
     AboutPage.route,
