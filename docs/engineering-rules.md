@@ -148,6 +148,52 @@ Zod schemas in the web client should accept `null` for optional fields and map t
 - Do not mix styling, domain state, and I/O responsibilities in the same module.
 - Justify all new dependencies and add them to the stack section of this document.
 
+### TanStack Query Requirements
+
+All `useQuery` and `useMutation` hooks must include `refetchOnWindowFocus: false` to prevent unnecessary network churn:
+
+```typescript
+useQuery({
+  queryKey: ['resource'],
+  queryFn: async () => {
+    /* ... */
+  },
+  staleTime: 1000 * 60 * 10,
+  gcTime: 1000 * 60 * 30,
+  refetchOnWindowFocus: false,
+})
+```
+
+### Adapter Pattern
+
+Adapters normalize Strapi payloads and map DTOs to domain types. Always:
+
+1. Call `getEntityFields()` from `lib/adapters/strapi-helpers.ts` to normalize v4/v5 formats
+2. Parse with Zod schema from `features/*/schemas.ts`
+3. Return typed domain model — never raw DTO
+
+### API Endpoints Strategy
+
+- **Static endpoints**: define as functions in `lib/api/endpoints.ts` for fixed queries (e.g., `global()`, `hero()`)
+- **Dynamic endpoints**: use `buildEndpoint()` helper for filters, pagination, custom populate
+- **Never use `?populate=deep` in production** — reserved for development/debug only
+
+### Zustand State Usage
+
+`stores/` is reserved for **cross-cutting UI state** with no natural feature owner:
+
+- Navigation menu state ✓
+- Theme toggle ✓
+- Feature-specific state (filters, highlights) → Use feature hooks instead ✗
+
+### Domain Type Contracts
+
+Domain types live in `src/interfaces.ts` (previously `interrfaces.ts` — typo fixed). API DTOs remain in `types/api.ts`. Adapters bridge the two, ensuring components only see domain types.
+
+### VITE_DEV_MODE Purpose
+
+Enables axios request/response logging in dev. Use in `lib/api/client.ts` for debug interceptors. **Never** use to gate business logic or hide production UI issues.
+
 ## Definition of Done
 
 A task is complete when:

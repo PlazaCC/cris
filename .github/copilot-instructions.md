@@ -1,26 +1,27 @@
 # Copilot Instructions — CRIS
 
-## Fonte de verdade
+## Source of Truth
 
-- Sempre seguir `docs/engineering-rules.md` como baseline de arquitetura, convenções e documentação.
-- Em caso de conflito, priorizar a decisão arquitetural mais restritiva (maior separação de responsabilidades).
+- Always follow `docs/engineering-rules.md` as baseline for architecture, conventions, and documentation.
+- For full architecture overview and patterns, see `AGENTS.md`.
+- In case of conflict, prioritize the most restrictive architectural decision (maximize separation of concerns).
 
-## Regras mandatórias
+## Mandatory Rules
 
-1. Aplicar Clean Architecture com dependências apontando para domínio/camadas internas.
-2. Não colocar lógica de negócio em componente visual (`components`) nem em controller Strapi.
-3. Não consumir API diretamente em páginas/componentes; usar camada de acesso a dados.
-4. Manter validação de fronteira com Zod no web e validação/sanitização no CMS.
-5. Evitar acoplamento entre contrato externo (DTO) e modelo interno de domínio.
+1. Apply Clean Architecture — dependencies point inward toward domain/internal layers.
+2. No business logic in visual components (`components/`) or Strapi controllers.
+3. Never consume API directly in pages/components — use data layer (hooks + adapters).
+4. Maintain boundary validation with Zod on web client and validation/sanitization on CMS.
+5. Avoid coupling between external contracts (API DTOs) and internal domain models.
 
-## Contexto atual obrigatório
+## Current Context
 
-- `clients/cms` está em fase inicial de Strapi.
-- `clients/web` ainda contém partes mockadas.
-- Toda evolução deve facilitar migração de mocks para dados reais sem alterar UI desnecessariamente.
+- `clients/cms` is in early Strapi phase — content types being shaped by actual usage.
+- `clients/web` still has mock fallbacks — migrate page-by-page to real CMS data.
+- Evolution must enable mock → real transition **without changing UI unnecessarily.**
 
-## Critérios de implementação
+## Implementation Criteria
 
-- Preferir mudanças pequenas, incrementais e com baixo risco.
-- Preservar consistência com stack atual (React 19, Vite 6, Tailwind 4, TanStack Query 5, Router 1, Strapi 5).
-- Antes de propor padrão novo, validar se já existe padrão equivalente no repositório.
+- Prefer small, incremental, low-risk changes.
+- Preserve consistency with current stack (React 19, Vite 6, Tailwind 4, TanStack Query 5, Router 1, Strapi 5).
+- Before proposing a new pattern, validate that an equivalent pattern doesn't already exist in the repo.

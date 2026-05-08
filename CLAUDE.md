@@ -9,37 +9,16 @@ Monorepo with Yarn workspaces. Two clients:
 - `clients/web` — React 19 + Vite 6 + TanStack (Query 5, Router 1) + Tailwind 4
 - `clients/cms` — Strapi 5 with PostgreSQL
 
-The source of truth for architecture rules is `docs/engineering-rules.md`. In case of conflict, the most restrictive architectural decision wins.
+The source of truth for architecture rules is `docs/engineering-rules.md`. For full architectural overview and patterns, see `AGENTS.md`.
+In case of conflict, the most restrictive architectural decision wins.
 
-### Web layer responsibilities
+### Architectural Decision Points for Claude
 
-| Layer | Path | Rule |
-|---|---|---|
-| Presentation | `pages/`, route components | Composition only, no business logic |
-| UI primitives | `components/` | Visual only, no API calls, no domain logic |
-| Use cases | `features/*/hooks/` | TanStack Query hooks — one per resource |
-| Validation | `features/*/schemas.ts` | Zod schemas — validate at API boundary |
-| HTTP + mapping | `lib/api/`, `lib/adapters/` | Centralized client; adapters map DTO → domain |
-| State | `stores/` | Zustand, only for cross-cutting UI state |
-
-**Data flow:** Component → Feature Hook → API Client → Adapter (Zod validation) → Domain type back to hook.
-
-API DTOs must never reach components unmapped. No direct API calls in pages or components.
-
-### CMS layer responsibilities
-
-Standard Strapi flow: `routes → controllers → services`. Controllers orchestrate; services hold business logic. Controllers must not contain complex logic.
-
-### Strapi → Web sync
-
-When any Strapi schema or field changes:
-1. Update `features/*/schemas.ts` (Zod)
-2. Update `lib/adapters/*`
-3. Update `features/*/hooks`
-4. Update `lib/api/endpoints.ts`
-5. Update consuming pages/components
-
-Single types may return `null` when unfilled in the CMS — Zod schemas must accept `null` for optional fields and adapters must provide safe defaults.
+- **No direct API calls in components.** All HTTP goes through hooks in `features/*/hooks/` and adapters in `lib/adapters/`.
+- **DTOs never leak unmapped.** Parse with Zod, transform with adapter, return domain type to component.
+- **Single types may be null.** When CMS field is unfilled, accept `null` in Zod and map to default in adapter.
+- **Error/loading states preserve layout.** See `HeroSection` and `ProjectsSection` in `pages/home/index.tsx` as canonical patterns.
+- **Path alias is `@/*` → `./src/*`.** Use it everywhere (e.g., `import { useHero } from '@/features/hero'`).
 
 ## Commands
 
@@ -93,6 +72,7 @@ docker compose -f docker-compose.dev.yml up -d   # db only
 ## Environment variables
 
 **Web** (`clients/web/.env`):
+
 ```
 VITE_STRAPI_API_URL=http://localhost:1337
 VITE_STRAPI_API_TOKEN=
@@ -100,6 +80,7 @@ VITE_DEV_MODE=true
 ```
 
 **CMS** (`clients/cms/.env`):
+
 ```
 DATABASE_CLIENT=postgres
 DATABASE_HOST=localhost
