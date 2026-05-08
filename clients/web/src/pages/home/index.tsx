@@ -244,7 +244,12 @@ const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
   ({ image, title, badges, onInView, isLast }, ref) => {
     const sentinelRef = useRef<HTMLDivElement>(null)
     const stickyStartY = useRef<number | null>(null)
+    const onInViewRef = useRef(onInView)
     const { scrollY } = useScroll()
+
+    useEffect(() => {
+      onInViewRef.current = onInView
+    })
 
     useEffect(() => {
       const sentinel = sentinelRef.current
@@ -255,6 +260,7 @@ const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
           if (!entry.isIntersecting && entry.boundingClientRect.top < 0) {
             // sentinel saiu pelo topo → card acabou de grudar
             stickyStartY.current = scrollY.get()
+            onInViewRef.current()
           } else if (entry.isIntersecting) {
             // sentinel voltou → card não está mais sticky
             stickyStartY.current = null
