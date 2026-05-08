@@ -1,5 +1,5 @@
 import { globalSchema } from '@/features/global/schemas'
-import type { GlobalData } from '@/interrfaces'
+import type { GlobalData } from '@/interfaces'
 import { getEntityFields } from './strapi-helpers'
 import { mapStrapiMediaToUrl } from './strapi-image'
 

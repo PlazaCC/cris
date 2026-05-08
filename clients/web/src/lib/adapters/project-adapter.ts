@@ -1,5 +1,5 @@
 import { projectSchema } from '@/features/projects/schemas'
-import type { Project, ProjectBlock } from '@/interrfaces'
+import type { Project, ProjectBlock } from '@/interfaces'
 import { mapStrapiBadgesToNames } from './badge-adapter'
 import { getEntityFields } from './strapi-helpers'
 import { mapResponsiveImage } from './strapi-image'

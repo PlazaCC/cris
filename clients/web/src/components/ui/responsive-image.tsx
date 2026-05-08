@@ -1,4 +1,4 @@
-import type { ResponsiveImage } from '@/interrfaces'
+import type { ResponsiveImage } from '@/interfaces'
 
 type ResponsiveImageProps = {
   image: ResponsiveImage

@@ -1,4 +1,4 @@
-import type { ResponsiveImage } from '@/interrfaces'
+import type { ResponsiveImage } from '@/interfaces'
 
 const STRAPI_BASE_URL =
   import.meta.env.VITE_STRAPI_API_URL || 'http://localhost:1337'

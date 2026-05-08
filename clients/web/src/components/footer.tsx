@@ -1,7 +1,7 @@
 import { ErrorState } from '@/components/feedback/error-state'
 import { LoadingState } from '@/components/feedback/loading-state'
 import { useFooter } from '@/features/footer/hooks/use-footer'
-import type { SocialLink } from '@/interrfaces'
+import type { SocialLink } from '@/interfaces'
 import { cn } from '@/lib/utils'
 import { useNavigationStore } from '@/stores/navigation-store'
 import { motion } from 'framer-motion'

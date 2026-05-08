@@ -1,5 +1,5 @@
 import { aboutSchema } from '@/features/about/schemas'
-import type { AboutData } from '@/interrfaces'
+import type { AboutData } from '@/interfaces'
 import { getEntityFields } from './strapi-helpers'
 import { mapResponsiveImage } from './strapi-image'
 

@@ -7,7 +7,7 @@ import { ScopeBlock } from '@/components/blocks/scope'
 import { ErrorState } from '@/components/feedback/error-state'
 import { LoadingState } from '@/components/feedback/loading-state'
 import { useProjects } from '@/features/projects/hooks/use-projects'
-import type { ProjectBlock } from '@/interrfaces'
+import type { ProjectBlock } from '@/interfaces'
 import { createRoute } from '@tanstack/react-router'
 import { AppLayout } from '../_layout'
 

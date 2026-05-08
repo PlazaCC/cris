@@ -1,4 +1,4 @@
-import type { ResponsiveImage } from '@/interrfaces'
+import type { ResponsiveImage } from '@/interfaces'
 import { ResponsiveImageView } from '../../../components/ui/responsive-image'
 
 type AboutHeroProps = {

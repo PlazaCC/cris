@@ -1,5 +1,5 @@
 import { heroSchema } from '@/features/hero/schemas'
-import type { HeroData } from '@/interrfaces'
+import type { HeroData } from '@/interfaces'
 import { getEntityFields } from './strapi-helpers'
 import { mapResponsiveImage } from './strapi-image'
 

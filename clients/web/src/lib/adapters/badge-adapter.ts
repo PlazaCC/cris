@@ -1,4 +1,4 @@
-import type { Badge } from '@/interrfaces'
+import type { Badge } from '@/interfaces'
 import { getEntityFields } from './strapi-helpers'
 
 export function mapStrapiBadgeToDomain(rawBadge: unknown): Badge {

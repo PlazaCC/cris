@@ -1,5 +1,5 @@
 import { ResponsiveImageView } from '@/components/ui/responsive-image'
-import type { ResponsiveImage } from '@/interrfaces'
+import type { ResponsiveImage } from '@/interfaces'
 
 export function ImagesBlock({ images }: { images: ResponsiveImage[] }) {
   if (images.length === 0) {

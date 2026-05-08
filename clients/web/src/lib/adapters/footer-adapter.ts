@@ -1,5 +1,5 @@
 import { footerSchema } from '@/features/footer/schemas'
-import type { FooterData } from '@/interrfaces'
+import type { FooterData } from '@/interfaces'
 import { getEntityFields } from './strapi-helpers'
 
 export function mapStrapiFooterToDomain(rawFooter: unknown): FooterData {

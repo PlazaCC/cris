@@ -10,7 +10,7 @@ import { useGlobal } from '@/features/global/hooks/use-global'
 import { useHero } from '@/features/hero/hooks/use-hero'
 import { useProjects } from '@/features/projects/hooks/use-projects'
 
-import type { Project, ResponsiveImage } from '@/interrfaces'
+import type { Project, ResponsiveImage } from '@/interfaces'
 
 import { cn } from '@/lib/utils'
 
@@ -271,21 +271,31 @@ const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
 
     const filter = useTransform(scrollY, (latest) => {
       if (isLast || stickyStartY.current === null) return 'blur(0px)'
-      const t = Math.max(0, Math.min(1, (latest - stickyStartY.current) / animationRange))
+      const t = Math.max(
+        0,
+        Math.min(1, (latest - stickyStartY.current) / animationRange)
+      )
       const blurAmount = Math.max(0, (t - 0.3) / 0.7) * 10
       return `blur(${blurAmount}px)`
     })
 
     const scale = useTransform(scrollY, (latest) => {
       if (isLast || stickyStartY.current === null) return 1
-      const t = Math.max(0, Math.min(1, (latest - stickyStartY.current) / animationRange))
+      const t = Math.max(
+        0,
+        Math.min(1, (latest - stickyStartY.current) / animationRange)
+      )
       return 1 - Math.max(0, (t - 0.3) / 0.7) * 0.12
     })
 
     return (
       <>
         {/* sentinel: 1px antes do sticky — quando sai pelo topo, o card grudou */}
-        <div ref={sentinelRef} className="pointer-events-none h-px" aria-hidden />
+        <div
+          ref={sentinelRef}
+          className="pointer-events-none h-px"
+          aria-hidden
+        />
         <div className="sticky top-0 pt-[35px]">
           <motion.div
             ref={ref}
