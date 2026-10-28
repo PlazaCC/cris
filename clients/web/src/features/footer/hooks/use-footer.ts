@@ -1,20 +1,17 @@
-import { useQuery } from '@tanstack/react-query'
+import { queryOptions, useQuery } from '@tanstack/react-query'
 
-import { mapStrapiFooterToDomain } from '@/lib/adapters/footer-adapter'
-import { apiClient } from '@/lib/api/client'
-import { endpoints } from '@/lib/api/endpoints'
-import { strapiSingleResponseSchema } from '@/lib/api/schemas'
+import { getFooter } from '@/features/footer/api'
 
-export function useFooter() {
-  return useQuery({
+export function footerQueryOptions() {
+  return queryOptions({
     queryKey: ['footer'],
-    queryFn: async () => {
-      const response = await apiClient.get(endpoints.footer())
-      const parsed = strapiSingleResponseSchema.parse(response.data)
-      return mapStrapiFooterToDomain(parsed.data)
-    },
+    queryFn: () => getFooter(),
     staleTime: 1000 * 60 * 10,
     gcTime: 1000 * 60 * 30,
     refetchOnWindowFocus: false,
   })
+}
+
+export function useFooter() {
+  return useQuery(footerQueryOptions())
 }

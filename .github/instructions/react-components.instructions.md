@@ -39,7 +39,7 @@ function HeroSection() {
 
 ## Domain Types Only
 
-All data reaching a component must be domain types (e.g., `HeroData`, `Project`) from `src/interfaces.ts`. Never accept raw API DTOs or `unknown`.
+All data reaching a component must be domain types (e.g., `HeroData`, `Project`) from `src/interfaces.ts`. Never accept raw database rows or `unknown`.
 
 ```typescript
 // ✓ Correct
@@ -47,7 +47,7 @@ function ProjectCard({ project }: { project: Project }) {}
 
 // ✗ Avoid
 function ProjectCard({ project }: { project: any }) {}
-function ProjectCard({ project }: { project: StrapiProjectDTO }) {}
+function ProjectCard({ project }: { project: typeof projects.$inferSelect }) {}
 ```
 
 ## Imports

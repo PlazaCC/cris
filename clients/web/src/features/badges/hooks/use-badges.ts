@@ -1,20 +1,17 @@
-import { useQuery } from '@tanstack/react-query'
+import { queryOptions, useQuery } from '@tanstack/react-query'
 
-import { mapStrapiBadgeToDomain } from '@/lib/adapters/badge-adapter'
-import { apiClient } from '@/lib/api/client'
-import { endpoints } from '@/lib/api/endpoints'
-import { strapiCollectionResponseSchema } from '@/lib/api/schemas'
+import { getBadges } from '@/features/badges/api'
 
-export function useBadges() {
-  return useQuery({
+export function badgesQueryOptions() {
+  return queryOptions({
     queryKey: ['badges'],
-    queryFn: async () => {
-      const response = await apiClient.get(endpoints.badges.list())
-      const parsed = strapiCollectionResponseSchema.parse(response.data)
-      return parsed.data.map((badge) => mapStrapiBadgeToDomain(badge))
-    },
+    queryFn: () => getBadges(),
     staleTime: 1000 * 60 * 30,
     gcTime: 1000 * 60 * 60,
     refetchOnWindowFocus: false,
   })
+}
+
+export function useBadges() {
+  return useQuery(badgesQueryOptions())
 }

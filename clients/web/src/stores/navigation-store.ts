@@ -9,4 +9,3 @@ export const useNavigationStore = create<NavigationStore>((set) => ({
   canNavigate: true,
   setCanNavigate: (canNavigate) => set({ canNavigate }),
 }))
-

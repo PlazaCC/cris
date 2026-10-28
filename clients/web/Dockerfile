@@ -13,19 +13,19 @@ COPY clients/web ./clients/web
 
 WORKDIR /opt/clients/web
 
-ARG VITE_STRAPI_API_URL
-ARG VITE_STRAPI_API_TOKEN
-ARG VITE_DEV_MODE=false
-
-ENV VITE_STRAPI_API_URL=$VITE_STRAPI_API_URL
-ENV VITE_STRAPI_API_TOKEN=$VITE_STRAPI_API_TOKEN
-ENV VITE_DEV_MODE=$VITE_DEV_MODE
-
 RUN yarn build
 
-FROM nginx:1.27-alpine
+FROM node:22-alpine
 
-COPY clients/web/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /opt/clients/web/dist /usr/share/nginx/html
+WORKDIR /opt/app
 
-EXPOSE 80
+COPY --from=build /opt/clients/web/.output ./.output
+
+# DATABASE_URL, BLOB_READ_WRITE_TOKEN, BETTER_AUTH_SECRET e BETTER_AUTH_URL
+# entram em runtime (docker compose / plataforma), nunca no build
+ENV NODE_ENV=production
+ENV PORT=3000
+
+EXPOSE 3000
+
+CMD ["node", ".output/server/index.mjs"]

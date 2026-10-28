@@ -1,44 +1,30 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { createRouter, RouterProvider } from '@tanstack/react-router'
+import { QueryClient } from '@tanstack/react-query'
+import { createRouter } from '@tanstack/react-router'
+import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 
-import { rootRoute } from './pages/root'
+import { routeTree } from './routeTree.gen'
 
-import { AppLayout } from './pages/_layout'
-import { AboutPage } from './pages/about'
-import { AdminRedirectPage } from './pages/admin/login'
-import { HomePage } from './pages/home'
-import { WorkPage } from './pages/work'
+export function getRouter() {
+  // Um QueryClient por request no servidor (e um único no cliente)
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 1000 * 60 * 10,
+        gcTime: 1000 * 60 * 30,
+      },
+    },
+  })
 
-const queryClient = new QueryClient()
+  const router = createRouter({
+    routeTree,
+    defaultPreload: 'intent',
+    defaultPreloadStaleTime: 0,
+    context: {
+      queryClient,
+    },
+  })
 
-const routeTree = rootRoute.addChildren([
-  AdminRedirectPage.route,
-  AppLayout.route.addChildren([
-    HomePage.route,
-    AboutPage.route,
-    WorkPage.route,
-  ]),
-])
+  setupRouterSsrQueryIntegration({ router, queryClient })
 
-const router = createRouter({
-  routeTree,
-  defaultPreload: 'intent',
-  defaultPreloadStaleTime: 0,
-  context: {
-    queryClient,
-  },
-})
-
-declare module '@tanstack/react-router' {
-  interface Register {
-    router: typeof router
-  }
-}
-
-export function Router() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  )
+  return router
 }

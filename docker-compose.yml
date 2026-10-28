@@ -1,65 +1,15 @@
+# Só o web: banco (Neon) e mídia (Vercel Blob) são serviços externos.
+# As variáveis vêm de clients/web/.env (veja .env.example).
 services:
-  db:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${DATABASE_USERNAME:-cris}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-cris}
-      POSTGRES_DB: ${DATABASE_NAME:-cris}
-    volumes:
-      - cms-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  cms:
-    build:
-      context: .
-      dockerfile: clients/cms/Dockerfile
-      target: prod
-    image: cris-cms:latest
-    restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      HOST: ${HOST:-0.0.0.0}
-      PORT: ${PORT:-1337}
-      DATABASE_CLIENT: ${DATABASE_CLIENT:-postgres}
-      DATABASE_HOST: ${DATABASE_HOST:-db}
-      DATABASE_PORT: ${DATABASE_PORT:-5432}
-      DATABASE_NAME: ${DATABASE_NAME:-cris}
-      DATABASE_USERNAME: ${DATABASE_USERNAME:-cris}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-cris}
-      JWT_SECRET: ${JWT_SECRET:-tobemodified}
-      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:-tobemodified}
-      API_TOKEN_SALT: ${API_TOKEN_SALT:-tobemodified}
-      TRANSFER_TOKEN_SALT: ${TRANSFER_TOKEN_SALT:-tobemodified}
-      APP_KEYS: ${APP_KEYS:-toBeModified1,toBeModified2}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-tobemodified}
-    ports:
-      - '1337:1337'
-    volumes:
-      - cms-uploads:/opt/clients/cms/public/uploads
-    depends_on:
-      db:
-        condition: service_healthy
-
   web:
     build:
       context: .
       dockerfile: clients/web/Dockerfile
-      args:
-        VITE_STRAPI_API_URL: ${VITE_STRAPI_API_URL:-http://localhost:1337}
-        VITE_STRAPI_API_TOKEN: ${VITE_STRAPI_API_TOKEN:-}
-        VITE_DEV_MODE: ${VITE_DEV_MODE:-false}
     image: cris-web:latest
     restart: unless-stopped
+    env_file:
+      - clients/web/.env
+    environment:
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:8080}
     ports:
-      - '8080:80'
-    depends_on:
-      - cms
-
-volumes:
-  cms-db:
-  cms-uploads:
+      - '8080:3000'

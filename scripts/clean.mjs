@@ -24,17 +24,6 @@ const commonClientTargets = [
   'tsconfig.tsbuildinfo',
 ]
 
-const clientExtraTargets = {
-  cms: ['.strapi', '.tmp', '.strapi-updater.json'],
-}
-
-const directoryCleanupRules = [
-  {
-    relativeDir: path.join('clients', 'cms', 'public', 'uploads'),
-    keep: new Set(['.gitkeep']),
-  },
-]
-
 async function removePath(relativePath) {
   const absolutePath = path.join(rootDir, relativePath)
 
@@ -55,30 +44,6 @@ async function getClientDirectories() {
   return entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name)
 }
 
-async function clearDirectoryContents(relativeDir, keep = new Set()) {
-  const absoluteDir = path.join(rootDir, relativeDir)
-
-  if (!existsSync(absoluteDir)) {
-    return []
-  }
-
-  const entries = await readdir(absoluteDir, { withFileTypes: true })
-  const removed = []
-
-  for (const entry of entries) {
-    if (keep.has(entry.name)) {
-      continue
-    }
-
-    const relativePath = path.join(relativeDir, entry.name)
-    const absolutePath = path.join(rootDir, relativePath)
-    await rm(absolutePath, { recursive: true, force: true })
-    removed.push(relativePath)
-  }
-
-  return removed
-}
-
 async function main() {
   const removed = []
 
@@ -90,21 +55,11 @@ async function main() {
   const clientNames = await getClientDirectories()
 
   for (const clientName of clientNames) {
-    const targets = [
-      ...commonClientTargets,
-      ...(clientExtraTargets[clientName] ?? []),
-    ]
-
-    for (const target of targets) {
+    for (const target of commonClientTargets) {
       const relativePath = path.join('clients', clientName, target)
       const didRemove = await removePath(relativePath)
       if (didRemove) removed.push(relativePath)
     }
-  }
-
-  for (const rule of directoryCleanupRules) {
-    const deletedEntries = await clearDirectoryContents(rule.relativeDir, rule.keep)
-    removed.push(...deletedEntries)
   }
 
   if (removed.length === 0) {

@@ -30,7 +30,7 @@ export const ErrorPage = ({
       )}
       {showErrorMessage && (
         <p className="text-destructive max-w-[600px] text-center text-sm">
-          {error.message}
+          {error instanceof Error ? error.message : String(error)}
         </p>
       )}
       <div className="flex gap-2">

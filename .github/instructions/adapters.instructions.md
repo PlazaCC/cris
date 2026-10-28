@@ -4,113 +4,57 @@ applyTo: 'clients/web/src/lib/adapters/**'
 
 # Adapters — Copilot Instructions
 
-## Adapter Pattern (DTO → Domain)
+## Adapter Pattern (Database Row → Domain)
 
-Every API response must be adapted before reaching business logic or components.
+Every database row is adapted before it leaves the server function. Adapters live in `clients/web/src/lib/adapters/`, one per resource (`about-adapter.ts`, `project-adapter.ts`, `contact-adapter.ts`, ...).
 
-### Step 1: Normalize Strapi Payload
-
-Call `getEntityFields()` from `strapi-helpers.ts` to handle Strapi v4/v5 payload differences:
+### Step 1: Type the input as the Drizzle row
 
 ```typescript
-import { getEntityFields } from './strapi-helpers'
+import type { projects } from '@/server/db/schema'
 
-function mapStrapiProjectToDomain(raw: unknown): Project {
-  // Strapi can return: { data: { id, attributes: {...} } } OR
-  // { id, attributes: {...} } OR { id, ...fields }
-  const fields = getEntityFields<Record<string, unknown>>(raw)
+type ProjectRow = typeof projects.$inferSelect
 ```
 
-This normalizes the payload so you can work with a consistent shape.
+Row types come in with `import type` from `@/server/db/schema`. The only runtime import from `@/server` allowed here is `server/db/json-types.ts` (plain Zod, no database or secrets).
 
-### Step 2: Validate with Zod
+### Step 2: Parse `jsonb` with the boundary schemas
 
-Parse the normalized fields using the feature's Zod schema:
+`jsonb` columns are typed with `$type<...>()`, which is only a compile-time promise. Parse them with the schemas from `server/db/json-types.ts`:
 
 ```typescript
-import { projectSchema } from '@/features/projects/schemas'
+import { projectBlocksSchema, responsiveImageSchema } from '@/server/db/json-types'
 
-const parsed = projectSchema.parse(fields)
+const blocks = projectBlocksSchema.parse(row.blocks)
 ```
 
-The schema lives in `features/*/schemas.ts`, **not** in the adapter.
+### Step 3: Return the domain type
 
-### Step 3: Return Domain Type
-
-Transform parsed data into a domain type (from `src/interfaces.ts`). Never return raw DTO or `unknown`:
+Return a type from `src/interfaces.ts`, never the raw row:
 
 ```typescript
-export function mapStrapiProjectToDomain(raw: unknown): Project {
-  const fields = getEntityFields<Record<string, unknown>>(raw)
-  const parsed = projectSchema.parse(fields)
-
+export function mapProjectRowToDomain(row: ProjectRow): Project {
   return {
-    slug: parsed.slug ?? '',
-    title: parsed.title ?? '',
-    description: parsed.description ?? '',
-    year: parsed.year ?? '',
-    coverImages: mapResponsiveImage(parsed.cover_images),
-    blocks: mapProjectBlocks(parsed.blocks),
-    badges: toStringArray(parsed.badges),
-    blurColor: parsed.blur_color ?? '#000',
+    documentId: row.id,
+    slug: row.slug,
+    title: row.title,
+    coverImages: responsiveImageSchema.parse(row.coverImage),
+    blocks: projectBlocksSchema.parse(row.blocks),
+    // ...
   }
 }
 ```
 
-## Media Handling
-
-### Responsive Images
-
-For Strapi `shared.responsive-image` components:
-
-```typescript
-import { mapResponsiveImage } from './strapi-image'
-
-const image = mapResponsiveImage(parsed.heroImage)
-// Returns: { desktop: 'https://...', mobile: 'https://...' }
-```
-
-### Single Media Fields
-
-For single image/file fields:
-
-```typescript
-import { mapStrapiMediaToUrl } from './strapi-image'
-
-const url = mapStrapiMediaToUrl(parsed.singleImage)
-// Handles: { data: { attributes: { url } } }, { url }, etc.
-```
-
-## Helper Functions
-
-Adapters live in `lib/adapters/`. Common helpers:
-
-- `getEntityFields()` — normalize Strapi payload format
-- `toStringArray()` — safely extract string arrays
-- `mapResponsiveImage()` — map `{ desktop, mobile }` with URLs
-- `mapStrapiMediaToUrl()` — extract single media URL
+- Dates become ISO strings (`row.createdAt.toISOString()`).
+- Secrets never cross the adapter: expose a flag instead (`MailSettings.hasPassword`, never the password).
+- A single type with no row yet (`row | undefined`) maps to defaults, never to an error.
 
 ## No `any` in Returns
 
 ```typescript
 // ✓ Type the return
-function mapStrapiProjectToDomain(raw: unknown): Project {}
+function mapProjectRowToDomain(row: ProjectRow): Project {}
 
-// ✗ Never return any
-function mapStrapiProjectToDomain(raw: unknown): any {}
+// ✗ Never return any or the row itself
+function mapProjectRowToDomain(row: ProjectRow): any {}
 ```
-
-## Location
-
-All adapters go in `clients/web/src/lib/adapters/`:
-
-```
-lib/adapters/
-  about-adapter.ts
-  hero-adapter.ts
-  project-adapter.ts
-  strapi-helpers.ts
-  strapi-image.ts
-```
-
-One adapter per resource. Shared utilities in `strapi-helpers.ts` and `strapi-image.ts`.

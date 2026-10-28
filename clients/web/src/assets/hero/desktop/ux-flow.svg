@@ -1,0 +1,66 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="182" height="266" viewBox="0 0 182 266" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Group 17">
+<path id="Rectangle 14" d="M16 2H166C173.732 2 180 8.26801 180 16V250C180 257.732 173.732 264 166 264H16C8.26801 264 2 257.732 2 250V16C2 8.26801 8.26801 2 16 2Z" fill="url(#paint0_radial_0_19)" stroke-width="4" stroke-linejoin="bevel" stroke="#FFFCF6"/>
+<rect id="Rectangle 16" x="110" y="154" width="50" height="34" rx="4" fill="#FFFCF6"/>
+<g id="Rectangle 20" filter="url(#filter0_i_0_19)">
+<rect x="110" y="214" width="50" height="34" rx="4" fill="url(#paint1_linear_0_19)"/>
+</g>
+<rect id="Rectangle 19" x="58" y="18" width="70" height="18" rx="4" fill="#FFFCF6"/>
+<rect id="Rectangle 18" x="18" y="154" width="50" height="34" rx="4" fill="#FFFCF6"/>
+<rect id="Rectangle 17" width="22.5097" height="22.5097" rx="8" transform="matrix(-0.707107 0.707107 0.707107 0.707107 91.917 62)" fill="#FFFCF6"/>
+<circle id="Ellipse 27" cx="44" cy="104" r="10" fill="#FFFCF6"/>
+<circle id="Ellipse 28" cx="136" cy="104" r="10" fill="#FFFCF6"/>
+<path id="Vector 8" d="M79 173H86C89.3137 173 92 170.314 92 167V102" stroke-width="4" stroke-linecap="round" stroke="#0A4CFF"/>
+<path id="Vector 9" d="M45 148V124" stroke-width="4" stroke-linecap="round" stroke="#0A4CFF"/>
+<path id="Vector 10" d="M46 88V83C46 79.6863 48.6863 77 52 77H69" stroke-width="4" stroke-linecap="round" stroke="#0A4CFF"/>
+<path id="Vector 11" d="M136 148V124" stroke-width="4" stroke-linecap="round" stroke="#0A4CFF"/>
+<path id="Vector 14" d="M92 62L92 44" stroke-width="4" stroke-linecap="round" stroke="#0A4CFF"/>
+<path id="Vector 13" d="M136 208L136 196" stroke-width="4" stroke-linecap="round" stroke="#0A4CFF"/>
+<path id="Vector 12" d="M135 88V83C135 79.6863 132.314 77 129 77H112" stroke-width="4" stroke-linecap="round" stroke="#0A4CFF"/>
+<g id="Group 11">
+<path id="Vector 15" d="M28 162H46" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke="#0936AF"/>
+<path id="Vector 16" d="M27 168H58" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#0936AF"/>
+<path id="Vector 17" d="M27 174H58" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#0936AF"/>
+<path id="Vector 18" d="M27 180H58" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#0936AF"/>
+</g>
+<g id="Group 12">
+<path id="Vector 15_2" d="M121 162H139" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke="#0936AF"/>
+<path id="Vector 16_2" d="M120 168H151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#0936AF"/>
+<path id="Vector 17_2" d="M120 174H151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#0936AF"/>
+<path id="Vector 18_2" d="M120 180H151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#0936AF"/>
+</g>
+<g id="Group 14">
+<path id="Vector 19" d="M67.7422 24H99.097" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke="#0936AF"/>
+<path id="Vector 20" d="M66 30H120" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#0936AF"/>
+</g>
+<g id="Group 13">
+<path id="Vector 15_3" d="M121 222H139" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke="#FFFCF6"/>
+<path id="Vector 16_3" d="M120 228H151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#FFFCF6"/>
+<path id="Vector 17_3" d="M120 234H151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#FFFCF6"/>
+<path id="Vector 18_3" d="M120 240H151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#FFFCF6"/>
+</g>
+<path id="Vector 21" d="M38 102L43 107L50 100" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke="#0936AF"/>
+<path id="Vector 22" d="M132 100L140 108" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke="#0936AF"/>
+<path id="Vector 23" d="M140 100L132 108" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke="#0936AF"/>
+</g>
+<defs>
+<filter id="filter0_i_0_19" x="110" y="214" width="50" height="34" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset/>
+<feGaussianBlur stdDeviation="16.8"/>
+<feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.0360776 0 0 0 0 0.211379 0 0 0 0 0.684694 0 0 0 1 0"/>
+<feBlend mode="normal" in2="shape" result="effect1_innerShadow_0_19"/>
+</filter>
+<radialGradient id="paint0_radial_0_19" cx="0" cy="0" r="1" gradientTransform="matrix(162 359 -181.955 85.6238 -16 -33)" gradientUnits="userSpaceOnUse">
+<stop stop-color="#215DFF"/>
+<stop offset="1" stop-color="#6A92FF" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="paint1_linear_0_19" x1="126.448" y1="216.27" x2="119.172" y2="254.294" gradientUnits="userSpaceOnUse">
+<stop stop-color="#001243"/>
+<stop offset="1" stop-color="#002CA2" stop-opacity="0"/>
+</linearGradient>
+</defs>
+</svg>

@@ -1,0 +1,24 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="836" height="482" viewBox="0 0 836 482" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="Group 4">
+<path id="Ellipse 14" d="M0 24C252.946 24 458 229.054 458 482" stroke-width="48" stroke="url(#paint0_radial_0_7)"/>
+<g id="Ellipse 15">
+<use xlink:href="#stroke0_0_7" stroke="url(#paint1_radial_0_7)"/>
+<use xlink:href="#stroke0_0_7" stroke="url(#paint2_radial_0_7)"/>
+</g>
+</g>
+<defs>
+<radialGradient id="paint0_radial_0_7" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(466 476) rotate(-162.096) scale(409.849 305.732)">
+<stop stop-color="#215DFF"/>
+<stop offset="1" stop-color="#6A92FF" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="paint1_radial_0_7" cx="0" cy="0" r="1" gradientTransform="matrix(-643.755 -103.991 155.147 -240.109 1227.21 477.048)" gradientUnits="userSpaceOnUse">
+<stop stop-color="#215DFF"/>
+<stop offset="1" stop-color="#6A92FF" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="paint2_radial_0_7" cx="0" cy="0" r="1" gradientTransform="matrix(724 -378 24.2066 357.228 458 482)" gradientUnits="userSpaceOnUse">
+<stop stop-color="#215DFF"/>
+<stop offset="1" stop-color="#6A92FF" stop-opacity="0"/>
+</radialGradient>
+<path id="stroke0_0_7" d="M458 482C458 273.236 627.236 104 836 104" stroke-width="48"/>
+</defs>
+</svg>

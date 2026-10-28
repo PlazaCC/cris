@@ -10,7 +10,7 @@ paths:
 1. **No direct API calls.** Data must arrive via feature hooks as typed domain objects only.
 2. **No business logic.** Components are pure presentation — filters, transforms, and selection belong in hooks or adapters.
 3. **No DTO manipulation.** Never parse, validate, or reshape API data inside components. That's the adapter's job.
-4. **Error and loading states must preserve section layout.** See canonical patterns in `HeroSection` and `ProjectsSection` (`pages/home/index.tsx`):
+4. **Error and loading states must preserve section layout.** See the canonical pattern in `ProjectsSection` (`pages/home/index.tsx`):
    - Maintain same height and DOM structure when loading/erroring
    - Use `LoadingState` and `ErrorState` components inside the existing layout container
    - Never let loading states collapse or shift the page
@@ -18,8 +18,8 @@ paths:
 ## Example Pattern (pages/home/index.tsx)
 
 ```typescript
-function HeroSection() {
-  const { data, isLoading, error, refetch } = useHero()
+function ProjectsSection() {
+  const { data, isLoading, error, refetch } = useProjects()
 
   // Maintain structure: same container whether loading, error, or success
   if (isLoading || error || !data) {
@@ -34,13 +34,13 @@ function HeroSection() {
     )
   }
 
-  return <HomeHero {...data} />
+  return <Projects projects={data} />
 }
 ```
 
 ## Domain Types Only
 
-All data reaching a component must be domain types (e.g., `HeroData`, `Project`) from `src/interfaces.ts`. Never accept raw API DTOs or `unknown`.
+All data reaching a component must be domain types (e.g., `Project`, `AboutData`) from `src/interfaces.ts`. Never accept raw database rows or `unknown`.
 
 ```typescript
 // ✓ Correct
@@ -48,7 +48,7 @@ function ProjectCard({ project }: { project: Project }) {}
 
 // ✗ Avoid
 function ProjectCard({ project }: { project: any }) {}
-function ProjectCard({ project }: { project: StrapiProjectDTO }) {}
+function ProjectCard({ project }: { project: typeof projects.$inferSelect }) {}
 ```
 
 ## Imports

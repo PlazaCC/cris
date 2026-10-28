@@ -1,22 +1,12 @@
 import type { Badge } from '@/interfaces'
-import { getEntityFields } from './strapi-helpers'
+import type { badges } from '@/server/db/schema'
 
-export function mapStrapiBadgeToDomain(rawBadge: unknown): Badge {
-  const fields = getEntityFields<Record<string, unknown>>(rawBadge)
+type BadgeRow = typeof badges.$inferSelect
 
+export function mapBadgeRowToDomain(row: BadgeRow): Badge {
   return {
-    documentId: typeof fields.documentId === 'string' ? fields.documentId : '',
-    name: typeof fields.name === 'string' ? fields.name : '',
-    slug: typeof fields.slug === 'string' ? fields.slug : undefined,
+    documentId: row.id,
+    name: row.name,
+    slug: row.slug,
   }
-}
-
-export function mapStrapiBadgesToNames(rawBadges: unknown): string[] {
-  if (!Array.isArray(rawBadges)) {
-    return []
-  }
-
-  return rawBadges
-    .map((item) => mapStrapiBadgeToDomain(item).name)
-    .filter((name) => Boolean(name))
 }

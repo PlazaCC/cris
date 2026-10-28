@@ -1,21 +1,21 @@
 # AGENTS.md — CRIS
 
-Monorepo: Strapi CMS (`clients/cms`) + React web client (`clients/web`).
+Monorepo with a single package: `clients/web` (TanStack Start), which serves the public site, the admin panel (`/admin`) and its own server functions. Content lives in Postgres (Neon) via Drizzle, images in Vercel Blob, login via Better Auth — there is no separate CMS.
 
 ## Setup
 
 1. `nvm use` (Node 22 required)
 2. `yarn install` (Yarn 4.9.2, `node-modules` linker — not PnP)
-3. Copy env files (PowerShell):
+3. Copy the env file and fill it in (`DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`):
    ```
-   Copy-Item clients/cms/.env.example clients/cms/.env
    Copy-Item clients/web/.env.example clients/web/.env
    ```
-4. `yarn dev:docker` — starts Postgres 16 on port 5432
-5. `yarn seed` — seeds CMS with initial data (must run before web works with real data)
-6. `yarn dev` — runs both CMS (port 1337) and web (port 4000)
+4. `yarn workspace client-web db:migrate` — creates the tables
+5. `yarn seed` — loads `clients/web/seed/` into Neon + Blob (idempotent)
+6. `yarn workspace client-web auth:create-admin <email> <password> [name]` — panel login
+7. `yarn dev` — web on port 4000, panel at `/admin`
 
-Workspace names are `client-cms` and `client-web` (not `cris-*`).
+The workspace name is `client-web` (not `cris-*`).
 
 After cloning, run `powershell ./scripts/setup-agents.ps1` to create agent skill symlinks.
 
@@ -65,18 +65,15 @@ MCP keys are stored in user-level env, never committed to repo.
 
 ## Key Commands
 
-| Command                                      | What it does                                                |
-| -------------------------------------------- | ----------------------------------------------------------- |
-| `yarn dev`                                   | Run both CMS and web concurrently                           |
-| `yarn workspace client-cms dev`              | Run Strapi alone                                            |
-| `yarn workspace client-web dev`              | Run Vite alone                                              |
-| `yarn seed`                                  | Seed CMS data from `clients/cms/data/data.json`             |
-| `yarn dev:docker:down`                       | Stop dev Postgres                                           |
-| `yarn clean`                                 | Remove all node_modules, dist, and build artifacts          |
-| `yarn workspace client-cms generate:openapi` | Generate OpenAPI spec → `clients/web/types/openapi.json`    |
-| `yarn workspace client-web generate:types`   | Generate TS types from OpenAPI → `clients/web/types/api.ts` |
-
-**Codegen order**: `generate:openapi` (cms) → `generate:types` (web).
+| Command                                         | What it does                                              |
+| ----------------------------------------------- | --------------------------------------------------------- |
+| `yarn dev`                                      | Run the web app (SSR) on :4000                            |
+| `yarn seed`                                     | Seed Neon + Blob from `clients/web/seed/`                 |
+| `yarn clean`                                    | Remove node_modules, dist, and build artifacts            |
+| `yarn workspace client-web db:generate`         | Generate a SQL migration from `src/server/db/schema.ts`   |
+| `yarn workspace client-web db:migrate`          | Apply migrations in `clients/web/drizzle/`                |
+| `yarn workspace client-web db:studio`           | Drizzle Studio                                            |
+| `yarn workspace client-web auth:create-admin`   | Create an admin or reset its password                     |
 
 ## Architecture
 
@@ -85,49 +82,35 @@ Clean Architecture — dependencies always point inward.
 ### Web (`clients/web/src`)
 
 ```
-pages/        — route composition only, no API calls
+routes/       — file-based routes (TanStack Start); wire loader, head, component
+pages/        — route composition only (public site + pages/admin)
 components/   — visual blocks, no business logic
-features/     — use cases by domain (about, badges, footer, global, hero, projects)
-  hooks/      — TanStack Query hooks live here
-  schemas.ts  — Zod schemas per feature
-entities/     — domain models and contracts
-lib/api/      — HTTP client (Axios), centralized endpoints
-lib/adapters/ — Strapi DTO → Domain mappers (one per resource)
+features/<x>/ — use cases by domain (about, auth, badges, contact, footer, global, media, projects)
+  api.ts      — server functions (createServerFn): reads, and writes behind authMiddleware
+  schemas.ts  — Zod input schemas, shared by server validators and admin forms
+  hooks/      — TanStack Query hooks (queryOptions + mutations)
+server/       — server-only: db/ (Drizzle schema, client, jsonb schemas), auth, mailer, sanitize, secret-box
+lib/adapters/ — database row → domain type mappers (one per resource)
+interfaces.ts — domain types
 ```
 
 **Rules:**
 
-- UI never calls the API directly. All HTTP goes through `lib/api/client.ts` + `lib/api/endpoints.ts`.
-- API DTOs never leak into components. Map through `lib/adapters/*-adapter.ts`.
-- Zod schemas in `lib/api/schemas.ts` and `features/*/schemas.ts` validate at boundaries.
-- Strapi single types may return `null` when not yet filled — Zod must accept `null` and adapters map to defaults.
-- TanStack Router (`@tanstack/react-router`) for routing. Route tree in `src/router.tsx`.
+- UI never touches data directly: components → `features/*/hooks` → `features/*/api.ts` → Drizzle → adapter.
+- Database rows never leak into components. Map through `lib/adapters/*-adapter.ts`; parse `jsonb` with `server/db/json-types.ts`.
+- Every write server function uses `authMiddleware` and validates with the feature's Zod schema.
+- A single type (`site_global`, `about`, `footer`) with no row yet maps to defaults, not to an error.
+- TanStack Start (SSR) + TanStack Router with file-based routes in `src/routes/`. `src/router.tsx` exports `getRouter()`. Route loaders prefetch `features/*` `queryOptions`; see `docs/engineering-rules.md` → Routing and SSR.
 - Path alias: `@/*` → `./src/*`.
 
-### CMS (`clients/cms/src`)
+## Schema Changes
 
-```
-api/          — one directory per content type (about, badge, footer, global, hero, project)
-  routes/     — HTTP contracts
-  controllers/— orchestrate request/response (no complex logic)
-  services/   — business logic and data access
-```
+Any content field change requires updates in **all** of:
 
-**Rules:**
-
-- Controllers should not contain complex business logic.
-- Validate and sanitize payloads before persisting.
-- Seed script (`scripts/seed.js`) handles media resolution, upserts, publishing, and public permissions.
-
-## Strapi ↔ Web Sync
-
-Any schema/field change in Strapi requires updates in **all** of:
-
-1. `lib/api/endpoints.ts` — endpoint URL
-2. `lib/api/schemas.ts` — Zod schema for response
-3. `features/*/schemas.ts` — feature-level Zod schema
-4. `lib/adapters/*-adapter.ts` — DTO → Domain mapper
-5. Consuming components/pages
+1. `server/db/schema.ts` + `db:generate` (commit the migration); `server/db/json-types.ts` for `jsonb`
+2. `interfaces.ts` and `lib/adapters/*-adapter.ts`
+3. `features/*/schemas.ts` and `features/*/api.ts`
+4. The admin form in `pages/admin/*` and the consuming public components
 
 ## Data Flow & Patterns
 
@@ -145,37 +128,23 @@ useQuery({
 })
 ```
 
-### Adapter Pattern (Strapi → Domain)
+### Adapter Pattern (Row → Domain)
 
-1. Call `getEntityFields()` from `lib/adapters/strapi-helpers.ts` — normalizes Strapi v4/v5 payload format
-2. Parse normalized object with Zod schema from `features/*/schemas.ts`
-3. Return typed domain model (e.g., `HeroData`, `Project`) — never raw DTO
-4. For `shared.responsive-image` component, use `mapResponsiveImage()` from `lib/adapters/strapi-image.ts`
-5. For single media fields, use `mapStrapiMediaToUrl()` — handles various Strapi media formats
-
-### API Endpoint Configuration
-
-Two strategies:
-
-- **Static endpoints** (fixed queries): define as functions in `lib/api/endpoints.ts` (e.g., `global()`, `hero()`, `projects.list()`)
-- **Dynamic endpoints** (filters, pagination, custom populate): use `buildEndpoint()` helper from `lib/api/endpoints.ts`
-- **Never use** `?populate=deep` in production API calls — reserved for development/debug. Use explicit `populate` params in `endpoints.ts`
+1. Type the input as the Drizzle row (`typeof table.$inferSelect`)
+2. Parse `jsonb` fields with the schemas from `server/db/json-types.ts`
+3. Return the domain type (e.g., `Project`, `AboutData`) — never the raw row; dates become ISO strings, secrets never leave the server
 
 ### Zustand State Usage
 
 `stores/` directory reserved for **cross-cutting UI state** with no natural feature owner:
 
-- Navigation menu open/close state → `navigation-store.ts` ✓
-- Theme toggle (dark/light) → `theme-store.ts` ✓
+- Navigation lock → `navigation-store.ts` ✓
+- Page transition handoff → `page-transition-store.ts` ✓
 - Feature-specific state (hero highlight, project filters) → Feature hook + React state ✗
-
-### VITE_DEV_MODE Purpose
-
-Enables axios request/response logging in dev environment. Controlled in `lib/api/client.ts` with optional interceptors. **Never** use to gate business logic or hide production UI issues.
 
 ### Domain Type Contracts
 
-Domain types live in `src/interfaces.ts`. API DTOs remain in `types/api.ts` (auto-generated from OpenAPI). Adapters bridge the two, ensuring components only see domain types.
+Domain types live in `src/interfaces.ts`. Database rows are typed from `server/db/schema.ts`. Adapters bridge the two, ensuring components only see domain types.
 
 ## Tooling
 
@@ -185,8 +154,7 @@ Domain types live in `src/interfaces.ts`. API DTOs remain in `types/api.ts` (aut
 
 ## Docker
 
-- `docker-compose.dev.yml` — Postgres only (for local dev)
-- `docker-compose.yml` — full stack (db + cms + web on port 8080, for production)
+- `docker-compose.yml` — the web app only (port 8080), reading `clients/web/.env`. Database and media are external (Neon, Vercel Blob).
 
 ## Docs and Instructions
 

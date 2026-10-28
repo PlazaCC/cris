@@ -27,15 +27,6 @@ export type SocialLink = {
   url: string
 }
 
-export type HeroData = {
-  highlight: string
-  title: string
-  subtitle: string
-  name: string
-  description: string
-  image: ResponsiveImage
-}
-
 export type FooterData = {
   brand: string
   links: SocialLink[]
@@ -92,4 +83,43 @@ export type GlobalData = {
     metaDescription: string
     shareImage: string
   }
+}
+
+export type MediaItem = {
+  id: string
+  url: string
+  pathname: string
+  contentType: string
+  size: number
+  alt: string
+  createdAt: string
+}
+
+// pending: enviando | sent: e-mail entregue ao SMTP | failed: o envio deu erro
+// | disabled: SMTP desligado no painel, nada foi tentado
+export type ContactEmailStatus = 'pending' | 'sent' | 'failed' | 'disabled'
+
+export type ContactMessage = {
+  id: string
+  name: string
+  email: string
+  message: string
+  emailStatus: ContactEmailStatus
+  emailError: string | null
+  emailAttempts: number
+  emailedAt: string | null
+  read: boolean
+  createdAt: string
+}
+
+// A senha nunca sai do servidor; o painel só sabe se existe uma salva
+export type MailSettings = {
+  enabled: boolean
+  host: string
+  port: number
+  secure: boolean
+  username: string
+  hasPassword: boolean
+  fromAddress: string
+  toAddress: string
 }

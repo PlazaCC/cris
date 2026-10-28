@@ -1,27 +1,34 @@
-import { createRoute } from '@tanstack/react-router'
-import { motion, useInView, useScroll, useTransform } from 'framer-motion'
+import { Link } from '@tanstack/react-router'
+import {
+  animate,
+  motion,
+  useInView,
+  useMotionValue,
+  useScroll,
+  useTransform,
+} from 'framer-motion'
 import { forwardRef, useEffect, useRef, useState } from 'react'
 
 import { ErrorState } from '@/components/feedback/error-state'
 import { LoadingState } from '@/components/feedback/loading-state'
+import { revealItem } from '@/components/page-transition/reveal'
+import {
+  beginCoverTransition,
+  COVER_TIMING,
+  coverContentOut,
+} from '@/components/page-transition/shared-cover-target'
 import { ResponsiveImageView } from '@/components/ui/responsive-image'
 
 import { useGlobal } from '@/features/global/hooks/use-global'
-import { useHero } from '@/features/hero/hooks/use-hero'
 import { useProjects } from '@/features/projects/hooks/use-projects'
 
-import type { Project, ResponsiveImage } from '@/interfaces'
+import type { Project } from '@/interfaces'
 
+import { getSmoothScroll } from '@/lib/smooth-scroll'
 import { cn } from '@/lib/utils'
+import { usePageTransitionStore } from '@/stores/page-transition-store'
 
-import { locomotiveScroll } from '@/main'
-import { AppLayout } from '../_layout'
-
-HomePage.route = createRoute({
-  path: '/',
-  component: HomePage,
-  getParentRoute: () => AppLayout.route,
-})
+import { HomeHero } from '@/pages/home/components/hero'
 
 export function HomePage() {
   return (
@@ -33,64 +40,17 @@ export function HomePage() {
 }
 
 function HeroSection() {
-  const {
-    data: global,
-    isLoading: isGlobalLoading,
-    error: globalError,
-    refetch: refetchGlobal,
-  } = useGlobal()
-  const {
-    data: hero,
-    isLoading: isHeroLoading,
-    error: heroError,
-    refetch: refetchHero,
-  } = useHero()
-
-  const isLoading = isGlobalLoading || isHeroLoading
-  const error = globalError || heroError
-  const hasData = Boolean(global && hero)
-
-  // Mantém estrutura visual mesmo com erro/loading
-  if (isLoading || error || !hasData) {
-    return (
-      <div className="h-dvh w-full px-10 pt-9 pb-[115px]">
-        <div className="bg-off-white relative flex h-full w-full flex-col items-center justify-center rounded-4xl p-[53px] shadow-2xl">
-          {isLoading && <LoadingState message="Carregando..." />}
-          {error && (
-            <ErrorState
-              title="Não foi possível carregar o conteúdo"
-              message="Verifique se o Strapi está ativo e tente novamente."
-              onRetry={() => {
-                void refetchGlobal()
-                void refetchHero()
-              }}
-            />
-          )}
-          {!isLoading && !error && !hasData && (
-            <ErrorState title="Conteúdo não encontrado" />
-          )}
-        </div>
-      </div>
-    )
-  }
-
-  if (!global || !hero) {
-    return null
-  }
-
-  const resolvedGlobal = global
-  const resolvedHero = hero
+  // A hero é conteúdo fixo; só o nome do site vem do banco, sem bloquear a renderização
+  const { data: global } = useGlobal()
+  const leaving = usePageTransitionStore((s) => s.cover !== null)
 
   return (
-    <HomeHero
-      siteName={resolvedGlobal.siteName}
-      highlight={resolvedHero.highlight}
-      title={resolvedHero.title}
-      subtitle={resolvedHero.subtitle}
-      name={resolvedHero.name}
-      description={resolvedHero.description}
-      image={resolvedHero.image}
-    />
+    <motion.div
+      className="w-full"
+      {...(leaving ? coverContentOut(true) : { variants: revealItem })}
+    >
+      <HomeHero siteName={global?.siteName || 'Cris'} />
+    </motion.div>
   )
 }
 
@@ -106,7 +66,7 @@ function ProjectsSection() {
           {error && (
             <ErrorState
               title="Não foi possível carregar os projetos"
-              message="Verifique se o Strapi está ativo e tente novamente."
+              message="Verifique sua conexão e tente novamente."
               onRetry={() => {
                 void refetch()
               }}
@@ -123,67 +83,14 @@ function ProjectsSection() {
   return <Projects projects={projects} />
 }
 
-export const HomeHero = ({
-  siteName,
-  highlight,
-  title,
-  subtitle,
-  name,
-  description,
-  image,
-}: {
-  siteName: string
-  highlight: string
-  title: string
-  subtitle: string
-  name: string
-  description: string
-  image?: ResponsiveImage
-}) => {
-  const [descriptionLine1 = '', descriptionLine2 = ''] = description.split('\n')
-
-  return (
-    <div className="h-dvh w-full px-10 pt-9 pb-[115px]">
-      <div className="bg-off-white relative flex h-full w-full flex-col justify-between rounded-4xl p-[53px] pb-[95px] shadow-2xl">
-        <div className="absolute top-0 left-0 z-1 h-full w-full">
-          {image?.desktop || image?.mobile ? (
-            <ResponsiveImageView
-              alt={siteName}
-              fetchPriority="high"
-              image={image}
-              imgClassName="h-full w-full object-contain"
-              loading="eager"
-            />
-          ) : null}
-        </div>
-        <span className="relative text-[32px] leading-[100%] font-bold text-black">
-          {siteName}
-        </span>
-        <div className="relative z-1 flex flex-col gap-16">
-          <h1 className="text-[88px] leading-[98%]">
-            <span className="after:bg-blue relative z-10 after:absolute after:bottom-[10px] after:left-0 after:-z-10 after:h-[8px] after:w-full after:content-['']">
-              {highlight}
-            </span>{' '}
-            {title} <br />
-            {subtitle}
-          </h1>
-          <p className="text-lg">
-            Hi, I'm <span className="text-blue">{name}</span>,{' '}
-            {descriptionLine1}
-            <br />
-            {descriptionLine2}
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export const Projects = ({ projects }: { projects: Project[] }) => {
   const sectionRef = useRef<HTMLElement>(null)
   const isSectionInView = useInView(sectionRef, { amount: 0.25 })
   const [activeIndex, setActiveIndex] = useState(0)
   const projectRefs = useRef<(HTMLDivElement | null)[]>([])
+  // Slug do card clicado enquanto a capa dele voa para o projeto
+  const leavingSlug = usePageTransitionStore((s) => s.cover?.slug ?? null)
+  const coverLaunched = usePageTransitionStore((s) => s.launched)
 
   const scrollTo = (index: number) => {
     const ref = projectRefs.current[index]
@@ -193,7 +100,7 @@ export const Projects = ({ projects }: { projects: Project[] }) => {
 
     const offset = -(window.innerHeight - height) / 2
 
-    locomotiveScroll.scrollTo(ref, {
+    getSmoothScroll()?.scrollTo(ref, {
       offset,
     })
   }
@@ -202,7 +109,7 @@ export const Projects = ({ projects }: { projects: Project[] }) => {
     <>
       <section
         ref={sectionRef}
-        className="relative w-full max-w-[1920px] px-10"
+        className="relative w-full max-w-[1920px] px-5 md:px-10"
       >
         <ul className="relative flex flex-col gap-9">
           {projects.map((project, index) => (
@@ -212,10 +119,14 @@ export const Projects = ({ projects }: { projects: Project[] }) => {
                 projectRefs.current[index] = el
               }}
               title={project.title}
+              slug={project.slug}
               badges={project.badges}
               image={project.coverImages}
               onInView={() => setActiveIndex(index)}
               isLast={index === projects.length - 1}
+              leaving={leavingSlug !== null}
+              isSource={leavingSlug === project.slug}
+              detached={leavingSlug === project.slug && coverLaunched}
             />
           ))}
         </ul>
@@ -223,7 +134,7 @@ export const Projects = ({ projects }: { projects: Project[] }) => {
 
       {/* Paginação fixa no meio da tela */}
       <Pagination
-        isVisible={isSectionInView}
+        isVisible={isSectionInView && leavingSlug === null}
         activeIndex={activeIndex}
         total={projects.length}
         onNavigate={scrollTo}
@@ -234,22 +145,55 @@ export const Projects = ({ projects }: { projects: Project[] }) => {
 
 type ProjectCardProps = {
   title: string
+  slug: string
   badges: string[]
   image: Project['coverImages']
   onInView: () => void
   isLast?: boolean
+  // Saindo para um projeto: o card clicado perde só o painel (a imagem vira a
+  // capa que voa) e os demais somem junto com o resto da página
+  leaving: boolean
+  isSource: boolean
+  // A capa já voa no overlay: o card de origem some para não ficar duplicado
+  detached: boolean
 }
 
 const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
-  ({ image, title, badges, onInView, isLast }, ref) => {
+  (
+    {
+      image,
+      title,
+      slug,
+      badges,
+      onInView,
+      isLast,
+      leaving,
+      isSource,
+      detached,
+    },
+    ref
+  ) => {
     const sentinelRef = useRef<HTMLDivElement>(null)
     const stickyStartY = useRef<number | null>(null)
     const onInViewRef = useRef(onInView)
     const { scrollY } = useScroll()
+    // 0 → efeito de empilhamento do scroll; 1 → card nítido e em escala cheia.
+    // O card clicado volta para frente enquanto o resto da página sai, para a
+    // capa partir de uma imagem igual à que vai voar
+    const release = useMotionValue(0)
 
     useEffect(() => {
       onInViewRef.current = onInView
     })
+
+    useEffect(() => {
+      if (!isSource) return
+      const controls = animate(release, 1, {
+        duration: COVER_TIMING.contentOut,
+        ease: [0.4, 0, 0.2, 1],
+      })
+      return () => controls.stop()
+    }, [isSource, release])
 
     useEffect(() => {
       const sentinel = sentinelRef.current
@@ -273,26 +217,30 @@ const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
       return () => observer.disconnect()
     }, [scrollY])
 
-    const animationRange = window.innerHeight
+    const filter = useTransform(
+      [scrollY, release],
+      ([latest, released]: number[]) => {
+        if (isLast || stickyStartY.current === null) return 'blur(0px)'
+        const t = Math.max(
+          0,
+          Math.min(1, (latest - stickyStartY.current) / window.innerHeight)
+        )
+        const blurAmount = Math.max(0, (t - 0.3) / 0.7) * 10 * (1 - released)
+        return `blur(${blurAmount}px)`
+      }
+    )
 
-    const filter = useTransform(scrollY, (latest) => {
-      if (isLast || stickyStartY.current === null) return 'blur(0px)'
-      const t = Math.max(
-        0,
-        Math.min(1, (latest - stickyStartY.current) / animationRange)
-      )
-      const blurAmount = Math.max(0, (t - 0.3) / 0.7) * 10
-      return `blur(${blurAmount}px)`
-    })
-
-    const scale = useTransform(scrollY, (latest) => {
-      if (isLast || stickyStartY.current === null) return 1
-      const t = Math.max(
-        0,
-        Math.min(1, (latest - stickyStartY.current) / animationRange)
-      )
-      return 1 - Math.max(0, (t - 0.3) / 0.7) * 0.12
-    })
+    const scale = useTransform(
+      [scrollY, release],
+      ([latest, released]: number[]) => {
+        if (isLast || stickyStartY.current === null) return 1
+        const t = Math.max(
+          0,
+          Math.min(1, (latest - stickyStartY.current) / window.innerHeight)
+        )
+        return 1 - Math.max(0, (t - 0.3) / 0.7) * 0.12 * (1 - released)
+      }
+    )
 
     return (
       <>
@@ -305,8 +253,12 @@ const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
         <div className="sticky top-0 pt-[35px]">
           <motion.div
             ref={ref}
-            className="mb-[93px] h-[80vh] w-full overflow-hidden rounded-4xl"
+            className={cn(
+              'relative mb-[93px] h-[80vh] w-full overflow-hidden rounded-4xl',
+              detached && 'invisible'
+            )}
             style={{ filter, scale }}
+            {...coverContentOut(leaving && !isSource)}
           >
             <ResponsiveImageView
               alt={title}
@@ -314,7 +266,29 @@ const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
               imgClassName="h-full w-full object-cover"
             />
 
-            <div className="absolute bottom-[30px] left-[35px] flex w-full max-w-[360px] flex-col gap-4 rounded-2xl bg-white px-8 py-4">
+            {/* O card inteiro abre o projeto */}
+            <Link
+              to="/work/$slug"
+              params={{ slug }}
+              // A página antiga fica na tela até a capa pousar: quem volta ao
+              // topo é o AnimatedOutlet quando a página nova monta
+              resetScroll={false}
+              aria-label={title}
+              className="absolute inset-0 z-10"
+              // A moldura do card é o ponto de partida da capa que voa para o projeto
+              onClick={(event) =>
+                beginCoverTransition(
+                  event,
+                  event.currentTarget.parentElement,
+                  slug
+                )
+              }
+            />
+
+            <motion.div
+              className="absolute inset-x-2.5 bottom-2.5 flex flex-col gap-4 rounded-2xl bg-white px-8 py-4 md:inset-x-auto md:bottom-[30px] md:left-[35px] md:w-full md:max-w-[360px]"
+              {...coverContentOut(isSource)}
+            >
               <h2 className="text-[32px]">{title}</h2>
               <ul className="flex gap-2">
                 {badges.map((badge) => (
@@ -326,7 +300,7 @@ const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
                   </li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </>
@@ -350,7 +324,7 @@ const Pagination = ({
   return (
     <motion.div
       className={cn(
-        'fixed top-1/2 z-50 flex w-full max-w-[1920px] -translate-y-1/2 justify-end pr-15'
+        'fixed top-1/2 z-50 flex w-full max-w-[1920px] -translate-y-1/2 justify-end pr-[22px] md:pr-15'
       )}
       initial={{ opacity: 0 }}
       animate={{

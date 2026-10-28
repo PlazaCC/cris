@@ -1,5 +1,8 @@
+import { motion } from 'framer-motion'
+
+import { revealItem } from '@/components/page-transition/reveal'
+import { ResponsiveImageView } from '@/components/ui/responsive-image'
 import type { ResponsiveImage } from '@/interfaces'
-import { ResponsiveImageView } from '../../../components/ui/responsive-image'
 
 type AboutHeroProps = {
   siteName: string
@@ -8,19 +11,34 @@ type AboutHeroProps = {
   image: ResponsiveImage
 }
 
+// Mobile: texto e imagem empilhados; a partir do lg, lado a lado. Os blocos
+// entram em ordem na troca de página (revealItem)
 export const AboutHero = ({ siteName, title, body, image }: AboutHeroProps) => {
   return (
-    <section className="mx-auto flex max-w-[1440px] gap-[138px] py-8 pr-10 pl-[155px]">
-      <div className="flex flex-1 flex-col gap-[155px] text-[32px] leading-[100%] font-bold">
-        <span className="text-black">{siteName}</span>
-        <div className="flex flex-col gap-16">
-          <h1 className="text-dark-black text-[66px] leading-[98%] font-bold">
+    <section className="mx-auto flex max-w-[1440px] flex-col gap-16 px-5 pt-4 pb-8 lg:flex-row lg:gap-[138px] lg:py-8 lg:pr-10 lg:pl-[155px]">
+      <div className="flex flex-1 flex-col gap-16 text-[32px] leading-[100%] font-bold lg:gap-[155px]">
+        <motion.span className="text-black" variants={revealItem}>
+          {siteName}
+        </motion.span>
+        <div className="flex flex-col gap-8 lg:gap-16">
+          <motion.h1
+            className="text-dark-black text-5xl leading-[98%] font-bold lg:text-[66px]"
+            variants={revealItem}
+          >
             {title}
-          </h1>
-          <p className="text-dark-black text-lg whitespace-pre-line">{body}</p>
+          </motion.h1>
+          <motion.p
+            className="text-dark-black text-lg font-normal whitespace-pre-line lg:font-bold"
+            variants={revealItem}
+          >
+            {body}
+          </motion.p>
         </div>
       </div>
-      <div className="bg-blue h-[811px] flex-1 overflow-hidden rounded-[32px]">
+      <motion.div
+        className="bg-blue h-[436px] overflow-hidden rounded-[32px] lg:h-[811px] lg:flex-1"
+        variants={revealItem}
+      >
         <ResponsiveImageView
           alt={title}
           fetchPriority="high"
@@ -28,7 +46,7 @@ export const AboutHero = ({ siteName, title, body, image }: AboutHeroProps) => {
           imgClassName="h-full w-full object-cover"
           loading="eager"
         />
-      </div>
+      </motion.div>
     </section>
   )
 }

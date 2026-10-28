@@ -1,6 +1,6 @@
+import { Marquee } from '@/components/ui/marquee'
 import { Check, Copy } from 'lucide-react'
 import React, { useRef, useState } from 'react'
-import Marquee from 'react-fast-marquee'
 
 export const MarqueeBlock = () => {
   const [copied, setCopied] = useState(false)

@@ -1,20 +1,17 @@
-import { globalSchema } from '@/features/global/schemas'
 import type { GlobalData } from '@/interfaces'
-import { getEntityFields } from './strapi-helpers'
-import { mapStrapiMediaToUrl } from './strapi-image'
+import { seoSchema } from '@/server/db/json-types'
+import type { siteGlobal } from '@/server/db/schema'
 
-export function mapStrapiGlobalToDomain(rawGlobal: unknown): GlobalData {
-  const fields = getEntityFields<Record<string, unknown>>(rawGlobal)
-  const parsed = globalSchema.parse(fields)
+type SiteGlobalRow = typeof siteGlobal.$inferSelect
 
+// Linha ausente = single type ainda não preenchido → valores padrão
+export function mapGlobalRowToDomain(row: SiteGlobalRow | undefined): GlobalData {
   return {
-    siteName: parsed.siteName ?? '',
-    siteDescription: parsed.siteDescription ?? '',
-    favicon: mapStrapiMediaToUrl(parsed.favicon),
-    defaultSeo: {
-      metaTitle: parsed.defaultSeo?.metaTitle ?? '',
-      metaDescription: parsed.defaultSeo?.metaDescription ?? '',
-      shareImage: mapStrapiMediaToUrl(parsed.defaultSeo?.shareImage),
-    },
+    siteName: row?.siteName ?? '',
+    siteDescription: row?.siteDescription ?? '',
+    favicon: row?.favicon ?? '',
+    defaultSeo: row
+      ? seoSchema.parse(row.defaultSeo)
+      : { metaTitle: '', metaDescription: '', shareImage: '' },
   }
 }

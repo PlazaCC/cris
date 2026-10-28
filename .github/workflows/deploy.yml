@@ -1,0 +1,89 @@
+# PR: lint + build. Push na main: lint → build → migrations → deploy de produção.
+# O deploy automático da Vercel pelo git está desligado (clients/web/vercel.json),
+# então nada chega em produção sem passar por aqui.
+#
+# Secrets (environment Production do GitHub): VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+# (e BLOB_READ_WRITE_TOKEN, só para o seed manual).
+# As demais envs da aplicação (DATABASE_URL, ...) vêm da própria
+# Vercel via `vercel pull`, para não existirem em dois lugares.
+
+name: CI / Deploy
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: Rodar o seed (clients/web/seed) depois das migrations
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # Deploy de produção nunca é cancelado no meio (migrations já podem ter rodado)
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_CLI: vercel@63.1.2
+
+jobs:
+  check:
+    name: Lint + build
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - run: yarn install --immutable
+      - run: yarn workspace client-web lint
+      - run: yarn workspace client-web build
+
+  deploy:
+    name: Build, migrate e deploy (produção)
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # Os secrets ficam no environment Production do GitHub
+    environment: Production
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - run: yarn install --immutable
+      - run: yarn workspace client-web lint
+
+      - name: Baixar configuração e envs de produção da Vercel
+        run: npx ${{ env.VERCEL_CLI }} pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      # Build antes das migrations: se o build quebrar, o banco não muda
+      - name: Build
+        run: npx ${{ env.VERCEL_CLI }} build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      # Migrations pela conexão direta (sem pooler), como o Neon recomenda para DDL
+      - name: Migrations
+        run: |
+          set -a; . ./.vercel/.env.production.local; set +a
+          export DATABASE_URL="${DATABASE_URL_UNPOOLED:-$DATABASE_URL}"
+          yarn workspace client-web db:migrate
+
+      # O token do Blob é Secret na Vercel (não vem no pull), então vem do GitHub
+      - name: Seed
+        if: github.event_name == 'workflow_dispatch' && inputs.seed
+        env:
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+        run: |
+          set -a; . ./.vercel/.env.production.local; set +a
+          yarn workspace client-web db:seed
+
+      - name: Deploy
+        run: npx ${{ env.VERCEL_CLI }} deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}

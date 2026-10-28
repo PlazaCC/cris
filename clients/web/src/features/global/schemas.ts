@@ -1,15 +1,11 @@
 import { z } from 'zod'
 
-export const globalSchema = z.object({
-  attributes: z.unknown().optional(),
-  siteName: z.string().optional(),
-  siteDescription: z.string().optional(),
-  favicon: z.unknown().optional(),
-  defaultSeo: z
-    .object({
-      metaTitle: z.string().optional(),
-      metaDescription: z.string().optional(),
-      shareImage: z.unknown().optional(),
-    })
-    .optional(),
+import { seoSchema } from '@/server/db/json-types'
+
+// Entrada do formulário do painel e da server function de escrita
+export const globalInputSchema = z.object({
+  siteName: z.string().trim().min(1, 'Informe o nome do site'),
+  siteDescription: z.string(),
+  favicon: z.string(),
+  defaultSeo: seoSchema,
 })

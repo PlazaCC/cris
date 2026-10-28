@@ -1,20 +1,17 @@
-import { useQuery } from '@tanstack/react-query'
+import { queryOptions, useQuery } from '@tanstack/react-query'
 
-import { mapStrapiProjectToDomain } from '@/lib/adapters/project-adapter'
-import { apiClient } from '@/lib/api/client'
-import { endpoints } from '@/lib/api/endpoints'
-import { strapiCollectionResponseSchema } from '@/lib/api/schemas'
+import { getProjects } from '@/features/projects/api'
 
-export function useProjects() {
-  return useQuery({
+export function projectsQueryOptions() {
+  return queryOptions({
     queryKey: ['projects'],
-    queryFn: async () => {
-      const response = await apiClient.get(endpoints.projects.list())
-      const parsed = strapiCollectionResponseSchema.parse(response.data)
-      return parsed.data.map((project) => mapStrapiProjectToDomain(project))
-    },
+    queryFn: () => getProjects(),
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 30,
     refetchOnWindowFocus: false,
   })
+}
+
+export function useProjects() {
+  return useQuery(projectsQueryOptions())
 }

@@ -1,20 +1,17 @@
-import { useQuery } from '@tanstack/react-query'
+import { queryOptions, useQuery } from '@tanstack/react-query'
 
-import { mapStrapiAboutToDomain } from '@/lib/adapters/about-adapter'
-import { apiClient } from '@/lib/api/client'
-import { endpoints } from '@/lib/api/endpoints'
-import { strapiSingleResponseSchema } from '@/lib/api/schemas'
+import { getAbout } from '@/features/about/api'
 
-export function useAbout() {
-  return useQuery({
+export function aboutQueryOptions() {
+  return queryOptions({
     queryKey: ['about'],
-    queryFn: async () => {
-      const response = await apiClient.get(endpoints.about())
-      const parsed = strapiSingleResponseSchema.parse(response.data)
-      return mapStrapiAboutToDomain(parsed.data)
-    },
+    queryFn: () => getAbout(),
     staleTime: 1000 * 60 * 10,
     gcTime: 1000 * 60 * 30,
     refetchOnWindowFocus: false,
   })
+}
+
+export function useAbout() {
+  return useQuery(aboutQueryOptions())
 }

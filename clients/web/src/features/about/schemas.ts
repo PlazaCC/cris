@@ -1,21 +1,16 @@
 import { z } from 'zod'
 
-const aboutItemSchema = z.object({
-  name: z.string().min(1),
-})
+import { nameItemSchema, responsiveImageSchema } from '@/server/db/json-types'
 
-export const aboutSchema = z.object({
-  documentId: z.string().optional(),
-  attributes: z.unknown().optional(),
-  title: z.string().optional(),
-  body: z.string().optional(),
-  clients: z.array(aboutItemSchema).optional(),
-  skills: z.array(aboutItemSchema).optional(),
-  image: z.unknown().optional(),
-  email: z.string().optional(),
-})
+const nameListSchema = z.array(
+  nameItemSchema.extend({ name: z.string().trim().min(1, 'Informe o nome') })
+)
 
-export const strapiSingleResponseSchema = z.object({
-  data: z.unknown(),
-  meta: z.unknown().optional(),
+export const aboutInputSchema = z.object({
+  title: z.string().trim().min(1, 'Informe o título'),
+  body: z.string(),
+  email: z.union([z.literal(''), z.string().trim().email('Email inválido')]),
+  clients: nameListSchema,
+  skills: nameListSchema,
+  image: responsiveImageSchema,
 })

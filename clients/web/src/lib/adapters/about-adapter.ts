@@ -1,18 +1,24 @@
-import { aboutSchema } from '@/features/about/schemas'
+import { z } from 'zod'
+
 import type { AboutData } from '@/interfaces'
-import { getEntityFields } from './strapi-helpers'
-import { mapResponsiveImage } from './strapi-image'
+import {
+  emptyResponsiveImage,
+  nameItemSchema,
+  responsiveImageSchema,
+} from '@/server/db/json-types'
+import type { about } from '@/server/db/schema'
 
-export function mapStrapiAboutToDomain(rawAbout: unknown): AboutData {
-  const fields = getEntityFields<Record<string, unknown>>(rawAbout)
-  const parsed = aboutSchema.parse(fields)
+type AboutRow = typeof about.$inferSelect
 
+const nameListSchema = z.array(nameItemSchema)
+
+export function mapAboutRowToDomain(row: AboutRow | undefined): AboutData {
   return {
-    title: parsed.title ?? '',
-    body: parsed.body ?? '',
-    clients: parsed.clients ?? [],
-    skills: parsed.skills ?? [],
-    image: mapResponsiveImage(parsed.image),
-    email: parsed.email ?? '',
+    title: row?.title ?? '',
+    body: row?.body ?? '',
+    clients: row ? nameListSchema.parse(row.clients) : [],
+    skills: row ? nameListSchema.parse(row.skills) : [],
+    image: row ? responsiveImageSchema.parse(row.image) : emptyResponsiveImage,
+    email: row?.email ?? '',
   }
 }

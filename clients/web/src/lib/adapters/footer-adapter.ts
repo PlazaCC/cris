@@ -1,16 +1,17 @@
-import { footerSchema } from '@/features/footer/schemas'
+import { z } from 'zod'
+
 import type { FooterData } from '@/interfaces'
-import { getEntityFields } from './strapi-helpers'
+import { socialLinkSchema } from '@/server/db/json-types'
+import type { footer } from '@/server/db/schema'
 
-export function mapStrapiFooterToDomain(rawFooter: unknown): FooterData {
-  const fields = getEntityFields<Record<string, unknown>>(rawFooter)
-  const parsed = footerSchema.parse(fields)
+type FooterRow = typeof footer.$inferSelect
 
+export function mapFooterRowToDomain(row: FooterRow | undefined): FooterData {
   return {
-    brand: parsed.brand ?? '',
-    links: parsed.links ?? [],
-    year: parsed.year ?? '',
-    copyright: parsed.copyright ?? '',
-    colophon: parsed.colophon ?? undefined,
+    brand: row?.brand ?? '',
+    links: row ? z.array(socialLinkSchema).parse(row.links) : [],
+    year: row?.year ?? '',
+    copyright: row?.copyright ?? '',
+    colophon: row?.colophon ?? undefined,
   }
 }

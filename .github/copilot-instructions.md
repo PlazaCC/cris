@@ -9,19 +9,19 @@
 ## Mandatory Rules
 
 1. Apply Clean Architecture — dependencies point inward toward domain/internal layers.
-2. No business logic in visual components (`components/`) or Strapi controllers.
-3. Never consume API directly in pages/components — use data layer (hooks + adapters).
-4. Maintain boundary validation with Zod on web client and validation/sanitization on CMS.
-5. Avoid coupling between external contracts (API DTOs) and internal domain models.
+2. No business logic in visual components (`components/`, `pages/`).
+3. Never access data directly in pages/components — use the data layer (hooks → server functions → adapters).
+4. Validate at every boundary with Zod: server function inputs, `jsonb` read from the database.
+5. Database rows never reach components; adapters map them to the domain types in `interfaces.ts`.
+6. Every write server function uses `authMiddleware`.
 
 ## Current Context
 
-- `clients/cms` is in early Strapi phase — content types being shaped by actual usage.
-- `clients/web` still has mock fallbacks — migrate page-by-page to real CMS data.
-- Evolution must enable mock → real transition **without changing UI unnecessarily.**
+- `clients/web` is the only package: public site + admin panel (`/admin`) + server functions.
+- Content lives in Postgres (Neon, Drizzle), images in Vercel Blob, login via Better Auth. There is no external CMS.
 
 ## Implementation Criteria
 
 - Prefer small, incremental, low-risk changes.
-- Preserve consistency with current stack (React 19, Vite 6, Tailwind 4, TanStack Query 5, Router 1, Strapi 5).
+- Preserve consistency with current stack (React 19, TanStack Start, TanStack Query 5, Router 1, Tailwind 4, Drizzle, Better Auth).
 - Before proposing a new pattern, validate that an equivalent pattern doesn't already exist in the repo.

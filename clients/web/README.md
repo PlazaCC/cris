@@ -1,38 +1,36 @@
-# CRIS Web (React + Vite)
+# CRIS Web (TanStack Start)
 
-Frontend do portfólio integrado ao Strapi (`clients/cms`) com:
+Site do portfólio e painel de conteúdo (`/admin`) no mesmo app:
 
-- TanStack Query para data fetching e cache
-- Adapters DTO → Domain com validação de fronteira
-- Hooks por feature (`about`, `projects`, `global`, `badges`)
+- Conteúdo no Postgres (Neon) via Drizzle, lido e gravado por server functions
+- Imagens no Vercel Blob
+- Login do painel com Better Auth
+- Formulário "get in touch" salvo no banco, com aviso por e-mail (SMTP configurado no painel)
 
 ## Variáveis de ambiente
 
-Copie `.env.example` para `.env` e ajuste se necessário:
-
-```bash
-VITE_STRAPI_API_URL=http://localhost:1337
-VITE_STRAPI_API_TOKEN=
-VITE_DEV_MODE=true
-```
+Copie `.env.example` para `.env` e preencha: `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `BETTER_AUTH_SECRET` e `BETTER_AUTH_URL`. Todas são só do servidor (sem prefixo `VITE_`).
 
 ## Comandos
 
 ```bash
-yarn workspace client-web dev
+yarn workspace client-web dev                  # http://localhost:4000
 yarn workspace client-web build
 yarn workspace client-web lint
+
+yarn workspace client-web db:generate          # gera a migração depois de mudar o schema
+yarn workspace client-web db:migrate           # aplica as migrações
+yarn workspace client-web db:seed              # carrega seed/data.json + seed/uploads
+yarn workspace client-web db:studio
+yarn workspace client-web auth:create-admin <email> <senha> [nome]
 ```
-
-## Fluxo local completo
-
-1. Suba o CMS (`clients/cms`) e rode o seed.
-2. Garanta permissões públicas para `about`, `project`, `badge` e `global`.
-3. Suba o web e acesse a aplicação.
 
 ## Arquitetura (resumo)
 
-- `src/lib/api`: client HTTP e endpoints do Strapi
-- `src/lib/adapters`: mapeamento e isolamento de contrato externo
-- `src/features/*/hooks`: hooks de query por contexto
-- `src/pages/*`: composição de UI sem acesso direto à API
+- `src/server`: código só do servidor (banco, auth, e-mail, sanitização)
+- `src/features/*/api.ts`: server functions de leitura e escrita
+- `src/features/*/hooks`: hooks de query e mutation por contexto
+- `src/lib/adapters`: linha do banco → tipo de domínio
+- `src/pages/*`: composição de UI (o painel fica em `pages/admin`)
+
+Regras completas em `docs/engineering-rules.md`.

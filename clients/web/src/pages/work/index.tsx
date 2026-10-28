@@ -1,49 +1,77 @@
+import { useParams } from '@tanstack/react-router'
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+
 import { ImagesBlock } from '@/components/blocks/images-block'
 import { ParagraphsBlock } from '@/components/blocks/paragraphs-block'
-import { ProjectProgressionBlock } from '@/components/blocks/projetct-progression'
 import { QuoteTitle } from '@/components/blocks/quote-title'
 import { ResultsBlock } from '@/components/blocks/results-block'
 import { ScopeBlock } from '@/components/blocks/scope'
 import { ErrorState } from '@/components/feedback/error-state'
 import { LoadingState } from '@/components/feedback/loading-state'
+import { projectRevealProps } from '@/components/page-transition/reveal'
+import { useCoverEntering } from '@/components/page-transition/shared-cover-target'
+import { useGlobal } from '@/features/global/hooks/use-global'
+import { useProject } from '@/features/projects/hooks/use-project'
 import { useProjects } from '@/features/projects/hooks/use-projects'
 import type { ProjectBlock } from '@/interfaces'
-import { createRoute } from '@tanstack/react-router'
-import { AppLayout } from '../_layout'
 
-WorkPage.route = createRoute({
-  path: '/work',
-  component: WorkPage,
-  getParentRoute: () => AppLayout.route,
-})
+import { NextProject } from './components/next-project'
+import { ProjectHeader } from './components/project-header'
 
-export function WorkPage() {
-  const { data: projects, isLoading, error, refetch } = useProjects()
+export function ProjectPage() {
+  // A página continua montada durante a transição de saída, quando a rota
+  // já não está ativa: o slug é o da montagem (cada projeto tem sua instância)
+  const params = useParams({ from: '/_app/work/$slug', shouldThrow: false })
+  const [slug] = useState(() => params?.slug ?? '')
+  const { data: global } = useGlobal()
+  const { data: project, isLoading, error, refetch } = useProject(slug)
+  const { data: projects } = useProjects()
+  // Vindo da home pela capa, os blocos entram depois do header
+  const entering = useCoverEntering(slug)
 
-  if (isLoading) {
-    return <LoadingState message="Carregando projeto..." />
-  }
-
-  if (error) {
+  if (isLoading || error || !project) {
     return (
-      <ErrorState
-        title="Não foi possível carregar o projeto"
-        message="Verifique se o Strapi está ativo e tente novamente."
-        onRetry={() => {
-          void refetch()
-        }}
-      />
+      <section className="flex min-h-dvh w-full items-center justify-center px-5">
+        {isLoading && <LoadingState message="Carregando projeto..." />}
+        {error && (
+          <ErrorState
+            title="Não foi possível carregar o projeto"
+            onRetry={() => {
+              void refetch()
+            }}
+          />
+        )}
+        {!isLoading && !error && !project && (
+          <ErrorState title="Projeto não encontrado" />
+        )}
+      </section>
     )
   }
 
-  const project = projects?.[0]
+  const index = projects?.findIndex((item) => item.slug === project.slug) ?? -1
+  const next =
+    projects && projects.length > 1
+      ? projects[(index + 1) % projects.length]
+      : undefined
 
-  if (!project) {
-    return <ErrorState title="Nenhum projeto encontrado" />
-  }
+  return (
+    <article className="flex flex-col items-center">
+      <ProjectHeader siteName={global?.siteName ?? 'unk'} project={project} />
+      <motion.div
+        className="flex w-full flex-col items-center"
+        {...projectRevealProps(entering, 0.3)}
+      >
+        {project.blocks.map(renderBlock)}
+        {next && <NextProject slug={next.slug} title={next.title} />}
+      </motion.div>
+    </article>
+  )
+}
 
-  const renderBlock = (block: ProjectBlock, index: number) => {
-    if (block.type === 'scope') {
+function renderBlock(block: ProjectBlock, index: number) {
+  switch (block.type) {
+    case 'scope':
       return (
         <ScopeBlock
           key={index}
@@ -51,33 +79,13 @@ export function WorkPage() {
           title={block.title}
         />
       )
-    }
-
-    if (block.type === 'quote-title') {
+    case 'quote-title':
       return <QuoteTitle key={index} text={block.text} />
-    }
-
-    if (block.type === 'paragraph') {
+    case 'paragraph':
       return <ParagraphsBlock items={block.items} key={index} />
-    }
-
-    if (block.type === 'images') {
+    case 'images':
       return <ImagesBlock images={block.images} key={index} />
-    }
-
-    return <ResultsBlock key={index} results={block.results} />
+    default:
+      return <ResultsBlock key={index} results={block.results} />
   }
-
-  return (
-    <>
-      <div className="flex flex-col items-center justify-center">
-        <h1 className="mt-8 text-4xl font-bold">{project.title}</h1>
-        <p className="text-dark-black mt-3 max-w-[920px] text-center text-lg">
-          {project.description}
-        </p>
-        {project.blocks.map(renderBlock)}
-        <ProjectProgressionBlock />
-      </div>
-    </>
-  )
 }

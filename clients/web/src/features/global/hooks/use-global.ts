@@ -1,20 +1,17 @@
-import { useQuery } from '@tanstack/react-query'
+import { queryOptions, useQuery } from '@tanstack/react-query'
 
-import { mapStrapiGlobalToDomain } from '@/lib/adapters/global-adapter'
-import { apiClient } from '@/lib/api/client'
-import { endpoints } from '@/lib/api/endpoints'
-import { strapiSingleResponseSchema } from '@/lib/api/schemas'
+import { getGlobal } from '@/features/global/api'
 
-export function useGlobal() {
-  return useQuery({
+export function globalQueryOptions() {
+  return queryOptions({
     queryKey: ['global'],
-    queryFn: async () => {
-      const response = await apiClient.get(endpoints.global())
-      const parsed = strapiSingleResponseSchema.parse(response.data)
-      return mapStrapiGlobalToDomain(parsed.data)
-    },
+    queryFn: () => getGlobal(),
     staleTime: 1000 * 60 * 60,
     gcTime: 1000 * 60 * 60 * 2,
     refetchOnWindowFocus: false,
   })
+}
+
+export function useGlobal() {
+  return useQuery(globalQueryOptions())
 }
