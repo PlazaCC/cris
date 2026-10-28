@@ -4,10 +4,11 @@ import {
   motion,
   useInView,
   useMotionValue,
+  useMotionValueEvent,
   useScroll,
   useTransform,
 } from 'framer-motion'
-import { forwardRef, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { ErrorState } from '@/components/feedback/error-state'
 import { LoadingState } from '@/components/feedback/loading-state'
@@ -87,22 +88,32 @@ export const Projects = ({ projects }: { projects: Project[] }) => {
   const sectionRef = useRef<HTMLElement>(null)
   const isSectionInView = useInView(sectionRef, { amount: 0.25 })
   const [activeIndex, setActiveIndex] = useState(0)
-  const projectRefs = useRef<(HTMLDivElement | null)[]>([])
+  const sentinelRefs = useRef<(HTMLDivElement | null)[]>([])
+  const { scrollY } = useScroll()
   // Slug do card clicado enquanto a capa dele voa para o projeto
   const leavingSlug = usePageTransitionStore((s) => s.cover?.slug ?? null)
   const coverLaunched = usePageTransitionStore((s) => s.launched)
 
-  const scrollTo = (index: number) => {
-    const ref = projectRefs.current[index]
-    if (!ref) return
+  // Posição de scroll em que o card gruda. Mede o sentinel, que segue no
+  // fluxo: o card sticky reporta onde está grudado, não onde fica na página
+  const stickPoint = (index: number) => {
+    const sentinel = sentinelRefs.current[index]
+    if (!sentinel) return 0
+    return sentinel.getBoundingClientRect().top + window.scrollY + 1
+  }
 
-    const height = ref.getBoundingClientRect().height
-
-    const offset = -(window.innerHeight - height) / 2
-
-    getSmoothScroll()?.scrollTo(ref, {
-      offset,
+  // Ativo é o último card que já cobriu o meio da tela, nos dois sentidos
+  useMotionValueEvent(scrollY, 'change', (latest) => {
+    const threshold = latest + window.innerHeight / 2
+    let next = 0
+    projects.forEach((_, index) => {
+      if (stickPoint(index) <= threshold) next = index
     })
+    setActiveIndex(next)
+  })
+
+  const scrollTo = (index: number) => {
+    getSmoothScroll()?.scrollTo(stickPoint(index))
   }
 
   return (
@@ -115,14 +126,13 @@ export const Projects = ({ projects }: { projects: Project[] }) => {
           {projects.map((project, index) => (
             <ProjectCard
               key={project.documentId || project.slug || index}
-              ref={(el) => {
-                projectRefs.current[index] = el
+              sentinelRef={(el) => {
+                sentinelRefs.current[index] = el
               }}
               title={project.title}
               slug={project.slug}
               badges={project.badges}
               image={project.coverImages}
-              onInView={() => setActiveIndex(index)}
               isLast={index === projects.length - 1}
               leaving={leavingSlug !== null}
               isSource={leavingSlug === project.slug}
@@ -148,7 +158,7 @@ type ProjectCardProps = {
   slug: string
   badges: string[]
   image: Project['coverImages']
-  onInView: () => void
+  sentinelRef: (el: HTMLDivElement | null) => void
   isLast?: boolean
   // Saindo para um projeto: o card clicado perde só o painel (a imagem vira a
   // capa que voa) e os demais somem junto com o resto da página
@@ -158,155 +168,147 @@ type ProjectCardProps = {
   detached: boolean
 }
 
-const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
-  (
-    {
-      image,
-      title,
-      slug,
-      badges,
-      onInView,
-      isLast,
-      leaving,
-      isSource,
-      detached,
-    },
-    ref
-  ) => {
-    const sentinelRef = useRef<HTMLDivElement>(null)
-    const stickyStartY = useRef<number | null>(null)
-    const onInViewRef = useRef(onInView)
-    const { scrollY } = useScroll()
-    // 0 → efeito de empilhamento do scroll; 1 → card nítido e em escala cheia.
-    // O card clicado volta para frente enquanto o resto da página sai, para a
-    // capa partir de uma imagem igual à que vai voar
-    const release = useMotionValue(0)
+const ProjectCard = ({
+  image,
+  title,
+  slug,
+  badges,
+  sentinelRef: registerSentinel,
+  isLast,
+  leaving,
+  isSource,
+  detached,
+}: ProjectCardProps) => {
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  const stickyStartY = useRef<number | null>(null)
+  const { scrollY } = useScroll()
+  // 0 → efeito de empilhamento do scroll; 1 → card nítido e em escala cheia.
+  // O card clicado volta para frente enquanto o resto da página sai, para a
+  // capa partir de uma imagem igual à que vai voar
+  const release = useMotionValue(0)
 
-    useEffect(() => {
-      onInViewRef.current = onInView
+  useEffect(() => {
+    if (!isSource) return
+    const controls = animate(release, 1, {
+      duration: COVER_TIMING.contentOut,
+      ease: [0.4, 0, 0.2, 1],
     })
+    return () => controls.stop()
+  }, [isSource, release])
 
-    useEffect(() => {
-      if (!isSource) return
-      const controls = animate(release, 1, {
-        duration: COVER_TIMING.contentOut,
-        ease: [0.4, 0, 0.2, 1],
-      })
-      return () => controls.stop()
-    }, [isSource, release])
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
 
-    useEffect(() => {
-      const sentinel = sentinelRef.current
-      if (!sentinel) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting && entry.boundingClientRect.top < 0) {
+          // sentinel saiu pelo topo → card acabou de grudar
+          stickyStartY.current = scrollY.get()
+        } else if (entry.isIntersecting) {
+          // sentinel voltou → card não está mais sticky
+          stickyStartY.current = null
+        }
+      },
+      { threshold: 0 }
+    )
 
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (!entry.isIntersecting && entry.boundingClientRect.top < 0) {
-            // sentinel saiu pelo topo → card acabou de grudar
-            stickyStartY.current = scrollY.get()
-            onInViewRef.current()
-          } else if (entry.isIntersecting) {
-            // sentinel voltou → card não está mais sticky
-            stickyStartY.current = null
-          }
-        },
-        { threshold: 0 }
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [scrollY])
+
+  const filter = useTransform(
+    [scrollY, release],
+    ([latest, released]: number[]) => {
+      if (isLast || stickyStartY.current === null) return 'blur(0px)'
+      const t = Math.max(
+        0,
+        Math.min(1, (latest - stickyStartY.current) / window.innerHeight)
       )
+      const blurAmount = Math.max(0, (t - 0.3) / 0.7) * 10 * (1 - released)
+      return `blur(${blurAmount}px)`
+    }
+  )
 
-      observer.observe(sentinel)
-      return () => observer.disconnect()
-    }, [scrollY])
+  const scale = useTransform(
+    [scrollY, release],
+    ([latest, released]: number[]) => {
+      if (isLast || stickyStartY.current === null) return 1
+      const t = Math.max(
+        0,
+        Math.min(1, (latest - stickyStartY.current) / window.innerHeight)
+      )
+      return 1 - Math.max(0, (t - 0.3) / 0.7) * 0.12 * (1 - released)
+    }
+  )
 
-    const filter = useTransform(
-      [scrollY, release],
-      ([latest, released]: number[]) => {
-        if (isLast || stickyStartY.current === null) return 'blur(0px)'
-        const t = Math.max(
-          0,
-          Math.min(1, (latest - stickyStartY.current) / window.innerHeight)
-        )
-        const blurAmount = Math.max(0, (t - 0.3) / 0.7) * 10 * (1 - released)
-        return `blur(${blurAmount}px)`
-      }
-    )
+  return (
+    <>
+      {/* sentinel: 1px antes do sticky — quando sai pelo topo, o card grudou.
+          -mb-9 anula o gap-9 da lista para ficar colado ao sticky */}
+      <div
+        ref={(el) => {
+          sentinelRef.current = el
+          registerSentinel(el)
+        }}
+        className="pointer-events-none -mb-9 h-px"
+        aria-hidden
+      />
+      <div className="sticky top-0 pt-[35px]">
+        <motion.div
+          className={cn(
+            'relative mb-[93px] h-[80vh] w-full overflow-hidden rounded-4xl',
+            detached && 'invisible'
+          )}
+          style={{ filter, scale }}
+          {...coverContentOut(leaving && !isSource)}
+        >
+          <ResponsiveImageView
+            alt={title}
+            image={image}
+            imgClassName="h-full w-full object-cover"
+          />
 
-    const scale = useTransform(
-      [scrollY, release],
-      ([latest, released]: number[]) => {
-        if (isLast || stickyStartY.current === null) return 1
-        const t = Math.max(
-          0,
-          Math.min(1, (latest - stickyStartY.current) / window.innerHeight)
-        )
-        return 1 - Math.max(0, (t - 0.3) / 0.7) * 0.12 * (1 - released)
-      }
-    )
+          {/* O card inteiro abre o projeto */}
+          <Link
+            to="/work/$slug"
+            params={{ slug }}
+            // A página antiga fica na tela até a capa pousar: quem volta ao
+            // topo é o AnimatedOutlet quando a página nova monta
+            resetScroll={false}
+            aria-label={title}
+            className="absolute inset-0 z-10"
+            // A moldura do card é o ponto de partida da capa que voa para o projeto
+            onClick={(event) =>
+              beginCoverTransition(
+                event,
+                event.currentTarget.parentElement,
+                slug
+              )
+            }
+          />
 
-    return (
-      <>
-        {/* sentinel: 1px antes do sticky — quando sai pelo topo, o card grudou */}
-        <div
-          ref={sentinelRef}
-          className="pointer-events-none h-px"
-          aria-hidden
-        />
-        <div className="sticky top-0 pt-[35px]">
           <motion.div
-            ref={ref}
-            className={cn(
-              'relative mb-[93px] h-[80vh] w-full overflow-hidden rounded-4xl',
-              detached && 'invisible'
-            )}
-            style={{ filter, scale }}
-            {...coverContentOut(leaving && !isSource)}
+            className="absolute inset-x-2.5 bottom-2.5 flex flex-col gap-4 rounded-2xl bg-white px-8 py-4 md:inset-x-auto md:bottom-[30px] md:left-[35px] md:w-full md:max-w-[360px]"
+            {...coverContentOut(isSource)}
           >
-            <ResponsiveImageView
-              alt={title}
-              image={image}
-              imgClassName="h-full w-full object-cover"
-            />
-
-            {/* O card inteiro abre o projeto */}
-            <Link
-              to="/work/$slug"
-              params={{ slug }}
-              // A página antiga fica na tela até a capa pousar: quem volta ao
-              // topo é o AnimatedOutlet quando a página nova monta
-              resetScroll={false}
-              aria-label={title}
-              className="absolute inset-0 z-10"
-              // A moldura do card é o ponto de partida da capa que voa para o projeto
-              onClick={(event) =>
-                beginCoverTransition(
-                  event,
-                  event.currentTarget.parentElement,
-                  slug
-                )
-              }
-            />
-
-            <motion.div
-              className="absolute inset-x-2.5 bottom-2.5 flex flex-col gap-4 rounded-2xl bg-white px-8 py-4 md:inset-x-auto md:bottom-[30px] md:left-[35px] md:w-full md:max-w-[360px]"
-              {...coverContentOut(isSource)}
-            >
-              <h2 className="text-[32px]">{title}</h2>
-              <ul className="flex gap-2">
-                {badges.map((badge) => (
-                  <li
-                    className="bg-blue rounded-full px-4 py-1 text-xs text-white"
-                    key={badge}
-                  >
-                    {badge}
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
+            <h2 className="text-[32px]">{title}</h2>
+            <ul className="flex gap-2">
+              {badges.map((badge) => (
+                <li
+                  className="bg-blue rounded-full px-4 py-1 text-xs text-white"
+                  key={badge}
+                >
+                  {badge}
+                </li>
+              ))}
+            </ul>
           </motion.div>
-        </div>
-      </>
-    )
-  }
-)
+        </motion.div>
+      </div>
+    </>
+  )
+}
 
 type PaginationProps = {
   isVisible: boolean
@@ -324,14 +326,13 @@ const Pagination = ({
   return (
     <motion.div
       className={cn(
-        'fixed top-1/2 z-50 flex w-full max-w-[1920px] -translate-y-1/2 justify-end pr-[22px] md:pr-15'
+        'pointer-events-none fixed top-1/2 z-50 flex w-full max-w-[1920px] -translate-y-1/2 justify-end pr-[22px] md:pr-15'
       )}
       initial={{ opacity: 0 }}
       animate={{
         opacity: isVisible ? 1 : 0,
       }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      style={{ pointerEvents: isVisible ? 'auto' : 'none' }}
     >
       <ul
         className={cn(
