@@ -87,13 +87,16 @@ jobs:
           export DATABASE_URL="${DATABASE_URL_UNPOOLED:-$DATABASE_URL}"
           yarn workspace client-web db:migrate
 
-      # O token do Blob é Secret na Vercel (não vem no pull), então vem do GitHub
+      # O token do Blob é Secret na Vercel (não vem no pull), então vem do GitHub.
+      # O SDK do Blob prefere OIDC (VERCEL_OIDC_TOKEN + BLOB_STORE_ID, que vêm no
+      # pull), mas o OIDC fora da Vercel é recusado: sem ele, usa o token.
       - name: Seed
         if: github.event_name == 'workflow_dispatch' && inputs.seed
         env:
           BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
         run: |
           set -a; . ./.vercel/.env.production.local; set +a
+          unset VERCEL_OIDC_TOKEN
           yarn workspace client-web db:seed
 
       - name: Deploy
