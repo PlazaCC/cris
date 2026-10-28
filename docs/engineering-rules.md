@@ -36,7 +36,7 @@ This document defines the technical baseline for:
 - React Hook Form `7.60.x` + `@hookform/resolvers` (admin forms)
 - GSAP `3.15.x` + `@gsap/react` `2.1.x` (SVG animation; DrawSVG and other plugins ship with `gsap`)
 - Zustand `5.0.x`
-- Zod `3.25.x`
+- Zod `4.x` (same major as Better Auth; see Deploy)
 - Radix UI (`@radix-ui/*`) for UI primitives
 
 ## Official Documentation
@@ -128,6 +128,8 @@ Content lives in Postgres (Neon) and is read directly by the web server through 
 - On `main`: build first, then migrations (`DATABASE_URL_UNPOOLED`, direct connection), then `vercel deploy --prebuilt --prod`. A failed build never touches the database.
 - Migrations run before the new code is live, so they must be backward compatible with the deployed version (add columns/tables first; drop or rename in a later deploy).
 - App env vars live only in the Vercel project (Production) and reach CI through `vercel pull`; GitHub only holds the Vercel token and IDs.
+- `vite dev` does not bundle dependencies, so it hides bundling bugs. CI runs `clients/web/scripts/smoke.sh` (boots `.output` with a fake database and checks a few routes) before anything touches production. Run it locally after dependency changes: `yarn workspace client-web build && bash clients/web/scripts/smoke.sh`.
+- Keep a single major version of shared runtime deps (e.g. `zod` 4, which Better Auth requires). Nitro rebundles the SSR output from the project root, so a dependency's nested copy is not used in production.
 
 ### Admin panel (`/admin`)
 

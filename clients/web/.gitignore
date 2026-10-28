@@ -30,3 +30,6 @@ dist-ssr
 .output
 .nitro
 .tanstack
+
+# log do scripts/smoke.sh
+smoke-server.log

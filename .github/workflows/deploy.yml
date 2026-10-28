@@ -1,4 +1,5 @@
-# PR: lint + build. Push na main: lint → build → migrations → deploy de produção.
+# PR: lint + build + smoke test. Push na main: lint → build + smoke → build da
+# Vercel → migrations → deploy de produção.
 # O deploy automático da Vercel pelo git está desligado (clients/web/vercel.json),
 # então nada chega em produção sem passar por aqui.
 #
@@ -45,6 +46,8 @@ jobs:
       - run: yarn install --immutable
       - run: yarn workspace client-web lint
       - run: yarn workspace client-web build
+      - name: Smoke test do servidor de produção
+        run: bash clients/web/scripts/smoke.sh
 
   deploy:
     name: Build, migrate e deploy (produção)
@@ -62,11 +65,19 @@ jobs:
       - run: yarn install --immutable
       - run: yarn workspace client-web lint
 
+      # Mesmo código em modo Node: confere que o servidor sobe antes de tocar no banco
+      - run: yarn workspace client-web build
+      - name: Smoke test do servidor de produção
+        run: bash clients/web/scripts/smoke.sh
+
       - name: Baixar configuração e envs de produção da Vercel
         run: npx ${{ env.VERCEL_CLI }} pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
-      # Build antes das migrations: se o build quebrar, o banco não muda
+      # Build antes das migrations: se o build quebrar, o banco não muda.
+      # Preset explícito: no CI o Nitro não detecta a Vercel sozinho e gera .output
       - name: Build
+        env:
+          NITRO_PRESET: vercel
         run: npx ${{ env.VERCEL_CLI }} build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       # Migrations pela conexão direta (sem pooler), como o Neon recomenda para DDL

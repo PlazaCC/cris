@@ -30,8 +30,8 @@ export const mailSettingsInputSchema = z
   .object({
     enabled: z.boolean(),
     host: z.string().trim().max(255),
-    port: z.coerce
-      .number({ invalid_type_error: 'Porta inválida' })
+    port: z
+      .number({ error: 'Porta inválida' })
       .int('Porta inválida')
       .min(1, 'Porta inválida')
       .max(65535, 'Porta inválida'),

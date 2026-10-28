@@ -30,7 +30,7 @@ export function useUpdateMailSettings() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: z.input<typeof mailSettingsInputSchema>) =>
+    mutationFn: (data: z.infer<typeof mailSettingsInputSchema>) =>
       updateMailSettings({ data }),
     onSuccess: (settings) => {
       queryClient.setQueryData(mailSettingsQueryOptions().queryKey, settings)
