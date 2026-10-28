@@ -50,10 +50,13 @@ export function ProjectPage() {
   }
 
   const index = projects?.findIndex((item) => item.slug === project.slug) ?? -1
-  const next =
-    projects && projects.length > 1
-      ? projects[(index + 1) % projects.length]
-      : undefined
+  const hasNeighbors = projects && projects.length > 1
+  const next = hasNeighbors
+    ? projects[(index + 1) % projects.length]
+    : undefined
+  const previous = hasNeighbors
+    ? projects[(index - 1 + projects.length) % projects.length]
+    : undefined
 
   return (
     <article className="flex flex-col items-center">
@@ -63,7 +66,7 @@ export function ProjectPage() {
         {...projectRevealProps(entering, 0.3)}
       >
         {project.blocks.map(renderBlock)}
-        {next && <NextProject slug={next.slug} title={next.title} />}
+        {previous && next && <NextProject previous={previous} next={next} />}
       </motion.div>
     </article>
   )

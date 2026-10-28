@@ -289,14 +289,15 @@ const ProjectCard = ({
           />
 
           <motion.div
-            className="absolute inset-x-2.5 bottom-2.5 flex flex-col gap-4 rounded-2xl bg-white px-8 py-4 md:inset-x-auto md:bottom-[30px] md:left-[35px] md:w-full md:max-w-[360px]"
+            className="absolute inset-x-2.5 bottom-2.5 flex flex-col gap-3 rounded-2xl bg-white px-5 py-4 md:inset-x-auto md:bottom-[30px] md:left-[35px] md:w-full md:max-w-[360px] md:gap-4 md:px-8"
             {...coverContentOut(isSource)}
           >
-            <h2 className="text-[32px]">{title}</h2>
-            <ul className="flex gap-2">
+            <h2 className="text-2xl md:text-[32px]">{title}</h2>
+            {/* Badges quebram de linha inteiras: no mobile não cabem lado a lado */}
+            <ul className="flex flex-wrap gap-2">
               {badges.map((badge) => (
                 <li
-                  className="bg-blue rounded-full px-4 py-1 text-xs text-white"
+                  className="bg-blue rounded-full px-3 py-1 text-xs whitespace-nowrap text-white md:px-4"
                   key={badge}
                 >
                   {badge}
